@@ -105,8 +105,7 @@ kaggle datasets version -p <dir> --dir-mode zip -m "src @ <sha>"
 
 ### Next steps, in roadmap order (Review 2 freeze: Sun 18 Oct)
 
-1. **e03:** Qwen3-VL-8B on the 500 e01 questions (kernel v9, running).
-   Confirms or overturns the e02 pick with ~125 questions per domain.
+1. **e03:** done. Qwen3-VL-8B confirmed as the backbone (above).
 2. **e04, Gemini reference:** `kernels/fbbench-gemini`, CPU, same 500
    questions. Needs the `GEMINI_API_KEY` secret and a run started in the
    editor (Save Version → Save & Run All); CLI-started runs get no secrets.
@@ -164,6 +163,33 @@ Result files are in `results/e00_smoke_*` (local only, gitignored); manifest row
 kernel now caps every clip at `MAX_FRAMES = 25`, the `budget_frames` in
 `configs/default.yaml`, so long rallies are subsampled uniformly to the same
 budget as every other method (rule 4).
+
+## Chosen backbone: Qwen3-VL-8B, 500 questions (e03, kernel v9)
+
+Sun 11 Oct, snapshot `6ec245b`, fp16 on T4 × 2, uniform 2 FPS, short side 448,
+cap 25 frames. The same 500 questions as e01, in the same order. **0 errors.**
+34.7 min.
+
+| Domain | n | Qwen2.5-VL-7B (e01) | **Qwen3-VL-8B** | Δ pts | p (McNemar) | Always-A | Tokens 7B → Q3 |
+|---|---|---|---|---|---|---|---|
+| Count | 124 | 41.9% | 41.1% | −0.8 | 1.00 | 25.8% | 5,001 → 4,012 |
+| Action | 126 | 21.4% | **27.8%** | +6.3 | 0.24 | 23.0% | 2,909 → 2,348 |
+| Position | 126 | 19.8% | 19.0% | −0.8 | 1.00 | 18.3% | 2,542 → 2,046 |
+| Cognition | 124 | 33.9% | **50.0%** | **+16.1** | **0.002** | 26.6% | 4,107 → 3,330 |
+
+Paired over the same questions (McNemar, exact): Qwen3-VL-8B is right on 85
+that Qwen2.5-VL-7B gets wrong and wrong on 59 that it gets right.
+
+- **Qwen3-VL-8B is the backbone for Review 2.** It is never meaningfully worse
+  on any domain, is significantly better on Cognition, uses 19% fewer input
+  tokens on every domain and takes 22% less time per question.
+- **Cognition** gains come from point reason (+27 pts) and hitting comment
+  (+21).
+- **Count** is a wash overall but hides a swap: round count +20 pts, detailed
+  hitting count −22. Worth a look when hand-checking answers.
+- **Position is still at chance** (19.0% vs 18.3% always-A). The backbone
+  change did not touch it; the resolution sweep is next.
+- Predictions lean to C (181) and B (158) against a gold split of 133/133/117/117.
 
 ## Backbone screen, 150 questions (e02, kernel v8)
 
