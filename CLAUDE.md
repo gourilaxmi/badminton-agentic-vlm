@@ -101,32 +101,9 @@ preference.
 
 ## Code layout
 
-```
-configs/            default.yaml, models/, experiments/
-docs/               HANDOFF.md, NOVELTY.md, ROADMAP.md, architecture.png
-scripts/            00_verify_dataset · 01_zeroshot_benchmark ·
-                    01b_backbone_sweep · 02_reproduce_baseline ·
-                    03_run_agent · 04_faithfulness · extract_frames.py
-kernels/            Kaggle kernels, pushed with `kaggle kernels push -p <dir>`:
-                    frame-cache/ (CPU, builds frames) · fbbench-zeroshot/ (T4 x2)
-src/bavlm/
-  data/schema.py    Plan / Evidence / Reflection / Trace    [working]
-  data/splits.py    overlap check, label vocabulary          [working]
-  data/loader.py    clip + annotation loading                [stub]
-  sampling/uniform.py   2 FPS baseline                       [working]
-  sampling/hit_centric.py  reproduced baseline               [stub, phase 2]
-  agent/            planner (parsing works) / observer / reflector / loop
-  agent/prompts/    planner.txt, observer.txt, reflector.txt [written]
-  tools/            pose.py, tracker.py                      [stub, phase 4]
-  memory/graph.py   SQLite temporal KG                       [working]
-  eval/fbbench.py   loader, prompt, scoring                  [working]
-  eval/faithfulness.py  counterfactual ablation              [working]
-  models/backend.py mock + real VLM backend                  [mock working]
-results/MANIFEST.md every run, one row
-tests/
-```
-
-Every stub raises `NotImplementedError` naming its roadmap phase.
+What is working vs stubbed is tracked in `STATUS.md`. Every stub raises
+`NotImplementedError` naming its roadmap phase. Kaggle kernels live in
+`kernels/` and are pushed with `kaggle kernels push -p <dir>`.
 
 ---
 
