@@ -140,7 +140,8 @@ class HFBackend:
 
     def __init__(self, hf_id: str, dtype: str = "float16", max_frames: int = 64,
                  fps: float = 2.0, short_side: int | None = None,
-                 device_map: str = "auto", attn_implementation: str = "sdpa") -> None:
+                 device_map: str = "auto", attn_implementation: str = "sdpa",
+                 max_memory: dict | None = None) -> None:
         self.name = hf_id
         self.hf_id = hf_id
         self.dtype = dtype          # T4 is sm_75: float16. bf16 needs sm_80+
@@ -149,6 +150,9 @@ class HFBackend:
         self.short_side = short_side  # resolution sweep: downscale at load, never upscale
         self.device_map = device_map
         self.attn_implementation = attn_implementation
+        # "auto" fills cuda:0 first, leaving no room there for attention on a long
+        # clip; a per-GPU cap spreads the weights so each card keeps headroom
+        self.max_memory = max_memory
         self._model = None
         self._proc = None
         self.last_stats: dict = {}
@@ -163,6 +167,7 @@ class HFBackend:
             dtype=getattr(torch, self.dtype),
             device_map=self.device_map,
             attn_implementation=self.attn_implementation,
+            **({"max_memory": self.max_memory} if self.max_memory else {}),
         ).eval()
         tok = self._proc.tokenizer
         self._video_pad = tok.convert_tokens_to_ids("<|video_pad|>")
@@ -264,6 +269,7 @@ def build_backend(cfg: dict, answer_key: dict[str, str] | None = None) -> VLMBac
         short_side=cfg.get("short_side"),
         device_map=cfg.get("device_map", "auto"),
         attn_implementation=cfg.get("attn_implementation", "sdpa"),
+        max_memory=cfg.get("max_memory"),
     )
 
 
