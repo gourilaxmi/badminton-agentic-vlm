@@ -17,6 +17,7 @@ import pytest
 from bavlm.models.backend import HFBackend, avoid_gqa_math_fallback, build_backend, frames_fps  # noqa: E402
 
 TINY = "trl-internal-testing/tiny-Qwen2_5_VLForConditionalGeneration"
+TINY3 = "trl-internal-testing/tiny-Qwen3VLForConditionalGeneration"   # backbone sweep candidate
 
 
 def _write_frames(d: pathlib.Path, n: int, ms_step: int = 500) -> list[str]:
@@ -61,12 +62,12 @@ def test_gqa_patch_only_below_ampere(monkeypatch):
 
 # ------------------------------------------------------------------ tiny model
 
-@pytest.fixture(scope="module")
-def tiny():
+@pytest.fixture(scope="module", params=[TINY, TINY3], ids=["qwen2.5-vl", "qwen3-vl"])
+def tiny(request):
     pytest.importorskip("torch")
     pytest.importorskip("torchvision")
     pytest.importorskip("transformers")
-    be = HFBackend(TINY, dtype="float32", device_map=None)
+    be = HFBackend(request.param, dtype="float32", device_map=None)
     try:
         be._load()
     except OSError as e:                          # offline, or the repo moved
@@ -96,7 +97,13 @@ def test_processor_receives_the_real_fps(tiny, tmp_path):
     # the bug this guards: unset fps -> transformers assumes 24 -> wrong time encoding
     frames = _write_frames(tmp_path, 8)
     inputs = tiny._inputs(frames, "Q?")
-    assert float(inputs["second_per_grid_ts"][0]) == pytest.approx(2 / 2.0)   # temporal_patch / fps
+    if "second_per_grid_ts" in inputs:                    # Qwen2.5-VL: time per temporal patch
+        assert float(inputs["second_per_grid_ts"][0]) == pytest.approx(2 / 2.0)   # temporal_patch / fps
+    else:                                                 # Qwen3-VL: a timestamp per frame pair, in the text
+        import re
+        text = tiny._proc.tokenizer.decode(inputs["input_ids"][0])
+        stamps = [float(x) for x in re.findall(r"<([\d.]+) seconds>", text)]
+        assert stamps == pytest.approx([0.25, 1.25, 2.25, 3.25], abs=0.051)   # pair midpoints at 2 FPS
 
 
 def test_max_frames_caps_uniformly_and_reports_it(tmp_path, tiny):

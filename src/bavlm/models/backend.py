@@ -257,6 +257,11 @@ class HFBackend:
                 ids = self._letter_ids(choices)
                 logits = self._model(**inputs, logits_to_keep=1).logits[0, -1].float()
                 lp = torch.log_softmax(logits, dim=-1)[ids]
+                if not torch.isfinite(lp).all():
+                    # fp16 overflow (bf16-trained weights on a T4): argmax over NaN
+                    # would silently answer "A", so return no answer instead
+                    self.last_stats["error"] = "nonfinite"
+                    return None
                 self.last_stats["choice_logprobs"] = {c: round(float(v), 4) for c, v in zip(choices, lp)}
                 return choices[int(lp.argmax())]
 
