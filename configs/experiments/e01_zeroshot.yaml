@@ -1,0 +1,6 @@
+name: e01_zeroshot
+phase: 1
+description: Zero-shot FBBench under uniform 2 FPS sampling.
+sampling: {strategy: uniform, fps: 2.0}
+agent: {enabled: false}
+models: [qwen2_5_vl_7b, qwen3_vl_8b]

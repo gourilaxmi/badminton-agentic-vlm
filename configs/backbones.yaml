@@ -1,0 +1,84 @@
+# Candidate backbones for the Review 2 screening sweep.
+#
+# Order matters: the sweep runs top to bottom and is resumable, so the models
+# you most need results for go first. If the session dies at model 4 you still
+# have the three that mattered.
+#
+# fp16 footprint vs Kaggle T4 x2 (32 GB total). Anything above ~13 GB needs
+# device_map="auto" to shard across both cards.
+
+screening:
+  n_questions: 150          # stratified across Count/Action/Position/Cognition
+  seed: 0
+  max_pixels: 50176         # 224*224
+  max_new_tokens: 8
+  temperature: 0.0
+
+models:
+
+  - name: qwen2_5_vl_7b
+    hf_id: Qwen/Qwen2.5-VL-7B-Instruct
+    params_b: 8.29
+    fp16_gb: 16.6
+    shard: true
+    loader: qwen2_5_vl
+    note: >
+      THE reference. FineBadminton's best result (42.06%) used this backbone,
+      so it is the only like-for-like comparison available. Run it first and
+      run it regardless of what else happens.
+
+  - name: qwen3_vl_8b
+    hf_id: Qwen/Qwen3-VL-8B-Instruct
+    params_b: 8.0
+    fp16_gb: 16.0
+    shard: true
+    loader: qwen3_vl
+    note: Newer Qwen generation; the obvious "has it improved" comparison.
+
+  - name: videollama3_7b
+    hf_id: DAMO-NLP-SG/VideoLLaMA3-7B
+    params_b: 7.0
+    fp16_gb: 14.0
+    shard: true
+    loader: videollama3
+    note: >
+      FineBadminton benchmarked this one too, so our number can be checked
+      against a published number on the same benchmark. Worth it for that
+      alone, even if it does not win.
+
+  - name: internvl3_5_8b
+    hf_id: OpenGVLab/InternVL3_5-8B
+    params_b: 8.0
+    fp16_gb: 16.0
+    shard: true
+    loader: internvl
+    note: >
+      Different family. Strong reported fine-grained spatial grounding, which
+      is where badminton is hardest. The most interesting "maybe" on the list.
+
+  - name: qwen2_5_vl_3b
+    hf_id: Qwen/Qwen2.5-VL-3B-Instruct
+    params_b: 3.75
+    fp16_gb: 7.5
+    shard: false              # fits one card
+    loader: qwen2_5_vl
+    note: >
+      Scale point, not a serious contender. Gives the performance-vs-size
+      figure and tells us how much of the 7B's score is capacity rather than
+      badminton knowledge.
+
+  - name: smolvlm2_2b
+    hf_id: HuggingFaceTB/SmolVLM2-2.2B-Instruct
+    params_b: 2.2
+    fp16_gb: 4.4
+    shard: false
+    loader: smolvlm
+    note: >
+      Cheap anchor for the low end of the scale curve. ~20 min to run. Drop
+      first if quota gets tight.
+
+# --- held for later, not Review 2 -------------------------------------------
+# Gemini 2.5 Pro / GPT-4.1 via API: no GPU needed, and FineBadminton published
+# Gemini at 38.6% so it validates our harness independently of any local setup.
+# Costs a few hundred rupees for 150 questions. Add only if a local result
+# looks implausible and we need a second opinion on the harness.

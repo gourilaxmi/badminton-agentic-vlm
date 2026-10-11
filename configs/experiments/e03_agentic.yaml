@@ -1,0 +1,7 @@
+name: e03_agentic
+phase: 3
+description: Query-conditioned agentic loop, training-free, equal frame budget.
+sampling: {strategy: agentic, budget_frames: 25}
+agent: {enabled: true, max_rounds: 3, use_pose: false}
+models: [qwen2_5_vl_7b]
+compare_against: [e01_zeroshot, e02_hit_centric]

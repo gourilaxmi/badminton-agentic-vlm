@@ -1,0 +1,16 @@
+torch>=2.4
+transformers>=4.51
+accelerate
+peft
+huggingface_hub[cli]
+decord
+opencv-python
+numpy
+pandas
+pyyaml
+tqdm
+langgraph
+langchain-core
+rouge-score
+bert-score
+pytest

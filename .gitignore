@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# data is downloaded, never committed
+data/
+!data/.gitkeep
+
+# run outputs
+results/*
+!results/.gitkeep
+!results/MANIFEST.md
+
+*.sqlite
+*.ckpt
+*.safetensors
+.ipynb_checkpoints/
+.DS_Store

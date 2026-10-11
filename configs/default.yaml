@@ -1,0 +1,20 @@
+# Shared defaults. Experiment configs override these.
+
+data:
+  train_root: data/finebadminton-20k
+  bench_root: data/fbbench
+  frame_cache: data/.frames        # extract once, never decode in a loop
+
+sampling:
+  source_fps: 25                   # FineBadminton is a consistent 25 FPS
+  baseline_fps: 2.0                # ~25 frames over a 12.4 s rally
+  budget_frames: 25                # hard cap -- all methods respect this
+
+agent:
+  max_rounds: 3                    # AVP found gains saturate here
+  sufficiency_threshold: 0.7
+
+eval:
+  seed: 0
+  temperature: 0.0                 # determinism matters for ablation
+  report_per_domain: true          # never report overall alone

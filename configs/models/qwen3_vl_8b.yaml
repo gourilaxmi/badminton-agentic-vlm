@@ -1,0 +1,4 @@
+name: qwen3_vl_8b
+hf_id: Qwen/Qwen3-VL-8B-Instruct
+dtype: bfloat16
+max_frames: 32
