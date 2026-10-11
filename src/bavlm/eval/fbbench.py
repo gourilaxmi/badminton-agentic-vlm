@@ -1,16 +1,15 @@
 """FBBench loading, prompting and scoring.
 
-The exact field names in the released JSON are not known until phase 0 dumps
-them, so the loader auto-detects across a list of candidates and reports what it
-found. **Run `Question.describe_schema()` once on the real data and pin the
-field names** -- auto-detection is a convenience for day one, not something to
-rely on for reported numbers.
+The schema is pinned to the HF release `Moujuruo/FineBadmintonBenchmark` @
+ff86093a (see results/dataset_report.md). Loading is strict: a record that does
+not match raises, because a silently skipped question shrinks the denominator
+and inflates accuracy.
 
 Design decisions that matter downstream:
 
-* Frames go BEFORE the question in the prompt. Questions are then grouped by
-  clip so prefix caching hits the whole visual prefix for every question after
-  the first on that clip. Question-first ordering gets none of that.
+* Frames go BEFORE the question in the prompt, so prefix caching can reuse the
+  visual prefix. In this release every question has its own clip, so the
+  saving only appears if a later release shares clips across questions.
 * `extract_choice` returns None rather than defaulting to "A", so a refusal
   scores as wrong instead of silently inheriting the always-A rate.
 """
@@ -24,33 +23,65 @@ from typing import Iterator, Sequence
 
 DOMAINS = ("count", "action", "position", "cognition")
 
-_FIELD_CANDIDATES = {
-    "qid":      ("qid", "question_id", "id", "index"),
-    "clip_id":  ("clip_id", "video_id", "video", "clip", "vid", "video_name"),
-    "question": ("question", "query", "prompt", "text"),
-    "options":  ("options", "choices", "candidates", "answers"),
-    "answer":   ("answer", "label", "gt", "ground_truth", "correct"),
-    "domain":   ("domain", "task", "task_type", "category", "type"),
+# Pinned field paths (tuples walk nested dicts). English is what we prompt with.
+FIELDS = {
+    "clip_id":  ("video_uid",),
+    "question": ("question", "question_en"),
+    "options":  ("options_en",),
+    "answer":   ("answer",),
+    "domain":   ("spatial",),
+}
+# Kept reachable via Question.question_zh / options_zh; never used for prompting.
+FIELDS_ZH = {
+    "question": ("question", "question_zh"),
+    "options":  ("options_zh",),
 }
 
+# File stem -> (domain, subtask). The subtask comes from the FILE, not the
+# `temporal` field: pointer_recog_updated is labelled temporal="round comment",
+# the same as round_comment_updated, although it asks why the point was won.
+# The domain here is cross-checked against each record's `spatial`.
+SUBTASKS = {
+    "benchmark_hitcount":                      ("count",     "hitting count"),
+    "benchmark_roundcount":                    ("count",     "round count"),
+    "benchmark_select_detail_count_questions": ("count",     "detailed hitting count"),
+    "benchmark_action_classification":         ("action",    "action classification"),
+    "benchmark_action_localization":           ("action",    "action localization"),
+    "benchmark_action_prediction":             ("action",    "action prediction"),
+    "benchmark_hitting_localization_new":      ("position",  "hitting localization"),
+    "benchmark_hitting_prediction":            ("position",  "hitting prediction"),
+    "benchmark_moving_recognization":          ("position",  "moving recognition"),
+    "benchmark_hitting_comment2_updated":      ("cognition", "hitting comment"),
+    "benchmark_round_comment_updated":         ("cognition", "round comment"),
+    "benchmark_pointer_recog_updated":         ("cognition", "point reason"),
+}
 
-def _pick(record: dict, key: str):
-    for cand in _FIELD_CANDIDATES[key]:
-        if cand in record:
-            return record[cand]
-    return None
+_OPTION_PREFIX = re.compile(r"^\s*([A-H])\s*[\.\):]\s*")
 
 
-def _norm_domain(raw) -> str | None:
-    """FBBench task types map onto four domains; names vary (T1..T12, 'Count',
-    'count_stroke', ...). Pin this once the real values are known."""
-    if raw is None:
-        return None
-    s = str(raw).lower()
-    for d in DOMAINS:
-        if d in s:
-            return d
-    return None
+def _get(record: dict, path: tuple[str, ...]):
+    """Follow a pinned field path; KeyError names the missing field."""
+    v = record
+    for k in path:
+        if not isinstance(v, dict) or k not in v:
+            raise KeyError(".".join(path))
+        v = v[k]
+    return v
+
+
+def _strip_letters(options: list) -> list[str]:
+    """Options ship as "A. 8"; the prompt adds its own letters, so strip theirs.
+
+    The shipped letter must match the position -- if it does not, the gold
+    letter would point at a different option than the one the model sees.
+    """
+    out = []
+    for i, o in enumerate(options):
+        m = _OPTION_PREFIX.match(str(o))
+        if not m or m.group(1) != chr(ord("A") + i):
+            raise ValueError(f"option {i} has no matching letter prefix: {str(o)[:40]!r}")
+        out.append(str(o)[m.end():])
+    return out
 
 
 @dataclass
@@ -61,7 +92,23 @@ class Question:
     options: list[str]
     answer: str                       # option LETTER, e.g. "B"
     domain: str | None = None
+    subtask: str | None = None        # one of three per domain, from SUBTASKS
+    duration: str | int | None = None # short/mid/long; an int in hitting_comment2 (unit unknown)
     raw: dict = field(default_factory=dict, repr=False)
+
+    @property
+    def question_zh(self) -> str | None:
+        try:
+            return str(_get(self.raw, FIELDS_ZH["question"]))
+        except KeyError:
+            return None
+
+    @property
+    def options_zh(self) -> list[str] | None:
+        try:
+            return list(_get(self.raw, FIELDS_ZH["options"]))
+        except KeyError:
+            return None
 
     # ---------------------------------------------------------------- prompt
     @property
@@ -99,61 +146,60 @@ class Question:
 
 # -------------------------------------------------------------------- loading
 
-def _iter_records(root: pathlib.Path) -> Iterator[dict]:
-    for p in sorted(list(root.rglob("*.json")) + list(root.rglob("*.jsonl"))):
-        if p.name == "manifest.json":
-            continue
-        try:
-            text = p.read_text()
-        except OSError:
-            continue
-        try:
-            records = ([json.loads(l) for l in text.splitlines() if l.strip()]
-                       if p.suffix == ".jsonl" else json.loads(text))
-        except json.JSONDecodeError:
-            continue
-        if isinstance(records, dict):
-            records = records.get("data", records.get("questions", [records]))
-        for r in records:
-            if isinstance(r, dict):
-                yield r
+def _benchmark_files(root: pathlib.Path) -> list[pathlib.Path]:
+    """The 12 benchmark_*.json files. Anything else under root (HF's .cache
+    metadata, a frame manifest) is not a question file and is never read."""
+    files = sorted(p for p in root.rglob("benchmark_*.json") if ".cache" not in p.parts)
+    unknown = [p.name for p in files if p.stem not in SUBTASKS]
+    if unknown:
+        raise ValueError(f"benchmark files not in SUBTASKS, pin them first: {unknown}")
+    return files
+
+
+def _iter_records(root: pathlib.Path) -> Iterator[tuple[pathlib.Path, int, dict]]:
+    for p in _benchmark_files(root):
+        records = json.loads(p.read_text(encoding="utf-8"))   # zh fields: never the locale default
+        if not isinstance(records, list):
+            raise ValueError(f"{p.name}: expected a list of records, got {type(records).__name__}")
+        for i, r in enumerate(records):
+            yield p, i, r
 
 
 def load_questions(root: str | pathlib.Path = "data/fbbench",
                    limit: int | None = None,
                    domains: Sequence[str] | None = None) -> list[Question]:
+    """Every MCQ in the release, in file order. Raises on any schema mismatch."""
     out: list[Question] = []
-    for i, r in enumerate(_iter_records(pathlib.Path(root))):
-        q_text = _pick(r, "question")
-        opts = _pick(r, "options")
-        ans = _pick(r, "answer")
-        if not (q_text and opts and ans is not None):
-            continue                                  # open-ended or malformed
+    for p, i, r in _iter_records(pathlib.Path(root)):
+        where = f"{p.name}[{i}]"
+        file_domain, subtask = SUBTASKS[p.stem]
+        try:
+            dom = str(_get(r, FIELDS["domain"]))
+            options = _strip_letters(list(_get(r, FIELDS["options"])))
+            answer = str(_get(r, FIELDS["answer"])).strip()
+            clip_id = str(_get(r, FIELDS["clip_id"]))
+            question = str(_get(r, FIELDS["question"]))
+        except (KeyError, ValueError) as e:
+            raise ValueError(f"{where}: {e}") from e
 
-        opts = list(opts) if isinstance(opts, (list, tuple)) else [opts]
+        if dom not in DOMAINS or dom != file_domain:
+            raise ValueError(f"{where}: spatial={dom!r}, expected {file_domain!r}")
+        if answer not in {chr(ord("A") + k) for k in range(len(options))}:
+            raise ValueError(f"{where}: answer {answer!r} is not one of {len(options)} option letters")
 
-        # the answer may be a letter, an index, or the option text itself
-        a = str(ans).strip()
-        if len(a) == 1 and a.upper().isalpha():
-            letter = a.upper()
-        elif a.isdigit():
-            letter = chr(ord("A") + int(a))
-        elif a in opts:
-            letter = chr(ord("A") + opts.index(a))
-        else:
-            continue
-
-        dom = _norm_domain(_pick(r, "domain"))
         if domains and dom not in domains:
             continue
-
         out.append(Question(
-            qid=str(_pick(r, "qid") or f"q{i}"),
-            clip_id=pathlib.Path(str(_pick(r, "clip_id") or "unknown")).stem,
-            question=str(q_text),
-            options=[str(o) for o in opts],
-            answer=letter,
+            # one clip per question in this release; the subtask prefix keeps
+            # qids unique if a later release reuses a clip across subtasks
+            qid=f"{p.stem.removeprefix('benchmark_')}/{clip_id}",
+            clip_id=clip_id,
+            question=question,
+            options=options,
+            answer=answer,
             domain=dom,
+            subtask=subtask,
+            duration=r.get("duration"),
             raw=r,
         ))
         if limit and len(out) >= limit:
@@ -161,12 +207,14 @@ def load_questions(root: str | pathlib.Path = "data/fbbench",
     return out
 
 
-def describe_schema(root: str | pathlib.Path = "data/fbbench", n: int = 3) -> None:
-    """Run this ONCE on the real data, then pin the field names above."""
-    for i, r in enumerate(_iter_records(pathlib.Path(root))):
-        if i >= n:
-            break
-        print(f"--- record {i} ---")
+def describe_schema(root: str | pathlib.Path = "data/fbbench", n: int = 1) -> None:
+    """Print the first n raw records of each file -- for checking a new release."""
+    seen: dict[str, int] = {}
+    for p, _, r in _iter_records(pathlib.Path(root)):
+        if seen.get(p.name, 0) >= n:
+            continue
+        seen[p.name] = seen.get(p.name, 0) + 1
+        print(f"--- {p.name} ---")
         for k, v in r.items():
             s = str(v)
             print(f"  {k:16} {type(v).__name__:6} {s[:70]}{'...' if len(s) > 70 else ''}")
