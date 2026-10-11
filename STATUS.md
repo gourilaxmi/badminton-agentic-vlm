@@ -161,6 +161,32 @@ kernel now caps every clip at `MAX_FRAMES = 25`, the `budget_frames` in
 `configs/default.yaml`, so long rallies are subsampled uniformly to the same
 budget as every other method (rule 4).
 
+## Backbone screen, 150 questions (e02, kernel v8)
+
+Sun 11 Oct, snapshot `6ec245b`, fp16 on T4 × 2, uniform 2 FPS, short side 448,
+cap 25 frames. Same 150 questions (round-robin, ~37 per domain), same frames,
+same prompt for every model. Qwen2.5-VL-7B is the first 150 rows of e01.
+
+| Model | Count | Action | Position | Cognition | Errors | Input tokens | s/q |
+|---|---|---|---|---|---|---|---|
+| **Qwen3-VL-8B** | 29.7% | **30.8%** | 18.9% | **43.2%** | 0 | **3,057** | 4.9 |
+| Qwen2.5-VL-7B | 24.3% | 23.1% | **24.3%** | 35.1% | 0 | 3,793 | 6.2 |
+| Qwen2.5-VL-3B | 24.3% | 17.9% | 18.9% | 16.2% | **46 non-finite** | 3,793 | 3.8 |
+
+Always-A on these 150: 22.7%. Mean 15.5 frames for every model (rule 4).
+
+- **Qwen3-VL-8B leads** on Action and Cognition, uses 19% fewer input tokens
+  (350 vs 448 visual tokens per frame pair) and runs faster. It is the current
+  pick for the main backbone.
+- **Position is at or below chance for all three.** Court position is not
+  readable from 448-px frames by any of them; this is the case for the
+  resolution sweep, not for a different backbone.
+- **Qwen2.5-VL-3B is not a valid entry**: 46/150 scores overflowed in fp16
+  (bf16-trained weights on a T4) and count as wrong. Do not rank it.
+- With ~37 questions per domain, one question is ~2.7 points; only the
+  Cognition and Action gaps are larger than noise. Confirm the pick on the
+  500 questions before freezing.
+
 ## Zero-shot baseline: Qwen2.5-VL-7B, 500 questions (e01, kernel v7)
 
 Sun 11 Oct, snapshot `39c567a`, fp16 on T4 × 2, uniform 2 FPS, short side 448,
