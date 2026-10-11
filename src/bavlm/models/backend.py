@@ -141,6 +141,26 @@ def avoid_gqa_math_fallback(capability: tuple[int, int] | None) -> bool:
     return True
 
 
+def load_frames(frames: Sequence, max_frames: int, short_side: int | None) -> tuple[list, list]:
+    """Load paths to RGB images; cap the count uniformly, never silently.
+
+    Shared by every real backend, so an API model sees exactly the frames and
+    resolution a local model does (rule 4)."""
+    from PIL import Image
+
+    if len(frames) > max_frames:
+        step = len(frames) / max_frames
+        frames = [frames[int(i * step)] for i in range(max_frames)]
+    imgs = []
+    for f in frames:
+        im = Image.open(f).convert("RGB") if isinstance(f, (str, bytes)) or hasattr(f, "__fspath__") else f
+        if short_side and min(im.size) > short_side:
+            s = short_side / min(im.size)
+            im = im.resize((round(im.size[0] * s), round(im.size[1] * s)), Image.BICUBIC)
+        imgs.append(im)
+    return list(frames), imgs
+
+
 class HFBackend:
     """Real model via transformers. Loaded lazily so importing this costs nothing.
 
@@ -203,20 +223,7 @@ class HFBackend:
         return ids
 
     def _frames(self, frames: Sequence) -> tuple[list, list]:
-        """Load paths to RGB images; cap the count uniformly, never silently."""
-        from PIL import Image
-
-        if len(frames) > self.max_frames:
-            step = len(frames) / self.max_frames
-            frames = [frames[int(i * step)] for i in range(self.max_frames)]
-        imgs = []
-        for f in frames:
-            im = Image.open(f).convert("RGB") if isinstance(f, (str, bytes)) or hasattr(f, "__fspath__") else f
-            if self.short_side and min(im.size) > self.short_side:
-                s = self.short_side / min(im.size)
-                im = im.resize((round(im.size[0] * s), round(im.size[1] * s)), Image.BICUBIC)
-            imgs.append(im)
-        return list(frames), imgs
+        return load_frames(frames, self.max_frames, self.short_side)
 
     def _inputs(self, frames: Sequence, prompt: str):
         used, imgs = self._frames(frames)
@@ -271,6 +278,113 @@ class HFBackend:
             return self._proc.tokenizer.decode(new, skip_special_tokens=True)
 
 
+class GeminiBackend:
+    """Gemini through the google-genai SDK: a closed-model reference point.
+
+    It cannot be fine-tuned or opened up for the faithfulness study, so it is a
+    ceiling to compare against, not a backbone candidate. To keep the comparison
+    fair it gets the same capped, resized frames as HFBackend (`load_frames`),
+    sent as JPEG images, each preceded by its timestamp (as Qwen3-VL's
+    `<t seconds>` markers do), then the unchanged prompt.
+
+    The API exposes no letter logits, so MCQ answers are constrained instead:
+    an enum response schema (`text/x.enum`) means the reply can only be one of
+    the option letters -- guided decoding, never hand-parsing. temperature 0
+    and a fixed seed (rule 9). Token counts come from the API's own usage
+    metadata (rule 6); `visual_tokens` is the IMAGE share of the prompt.
+
+    Transient errors (429 rate limits, 5xx) are retried with backoff; anything
+    left is recorded in `last_stats["error"]` and returns None, scored wrong.
+    """
+
+    def __init__(self, model: str, max_frames: int = 64, fps: float = 2.0,
+                 short_side: int | None = None, seed: int = 0, thinking_budget: int | None = None,
+                 api_key: str | None = None, client=None, retries: int = 6) -> None:
+        self.name = model
+        self.model = model
+        self.max_frames = max_frames
+        self.fps = fps
+        self.short_side = short_side
+        self.seed = seed
+        self.thinking_budget = thinking_budget   # None = model default; Pro cannot turn it off
+        self.api_key = api_key
+        self.retries = retries
+        self._client = client                    # injected in tests
+        self.last_stats: dict = {}
+
+    def _parts(self, frames: Sequence, prompt: str) -> list:
+        import io
+
+        from google.genai import types
+
+        used, imgs = load_frames(frames, self.max_frames, self.short_side)
+        fps = frames_fps(used, self.fps)
+        ts = [int(m.group(1)) / 1000 if (m := _TS_MS.search(str(f))) else i / fps
+              for i, f in enumerate(used)]
+        parts = []
+        for t, im in zip(ts, imgs):
+            buf = io.BytesIO()
+            im.save(buf, format="JPEG", quality=90)
+            parts += [types.Part.from_text(text=f"<{t:.1f} seconds>"),
+                      types.Part.from_bytes(data=buf.getvalue(), mime_type="image/jpeg")]
+        parts.append(types.Part.from_text(text=prompt))
+        self.last_stats = {"n_frames_in": len(frames), "n_frames": len(imgs),
+                           "frame_wh": list(imgs[0].size) if imgs else None,
+                           "fps": round(fps, 3) if imgs else None}
+        return parts
+
+    def _call(self, parts: list, config):
+        import random as _r
+        import time
+
+        if self._client is None:
+            from google import genai
+            self._client = genai.Client(api_key=self.api_key) if self.api_key else genai.Client()
+        for attempt in range(self.retries + 1):
+            try:
+                return self._client.models.generate_content(model=self.model, contents=parts, config=config)
+            except Exception as e:                                   # noqa: BLE001
+                if attempt == self.retries or getattr(e, "code", None) not in (429, 500, 502, 503, 504):
+                    raise
+                time.sleep(min(60, 2 ** attempt) + _r.random())
+
+    def generate(self, frames: Sequence, prompt: str, choices: Sequence[str] | None = None,
+                 max_new_tokens: int = 64, **kw) -> str | None:
+        """With `choices`, the reply is constrained to one option letter.
+        Without, temperature-0 free-form generation."""
+        from google.genai import types
+
+        parts = self._parts(frames, prompt)
+        cfg: dict = {"temperature": 0, "seed": self.seed}
+        if self.thinking_budget is not None:
+            cfg["thinking_config"] = types.ThinkingConfig(thinking_budget=self.thinking_budget)
+        if choices:
+            cfg |= {"response_mime_type": "text/x.enum",
+                    "response_schema": types.Schema(type=types.Type.STRING, enum=list(choices))}
+        else:
+            cfg["max_output_tokens"] = max_new_tokens
+        try:
+            resp = self._call(parts, types.GenerateContentConfig(**cfg))
+        except Exception as e:                                       # noqa: BLE001
+            self.last_stats |= {"error": f"api:{getattr(e, 'code', None) or type(e).__name__}",
+                                "input_tokens": None, "visual_tokens": None}
+            return None
+
+        u = resp.usage_metadata
+        image = sum(d.token_count or 0 for d in (u.prompt_tokens_details or [])
+                    if "IMAGE" in str(d.modality))
+        self.last_stats |= {"input_tokens": u.prompt_token_count, "visual_tokens": image,
+                            "output_tokens": u.candidates_token_count,
+                            "thinking_tokens": u.thoughts_token_count}
+        text = (resp.text or "").strip()
+        if not choices:
+            return text
+        if text in list(choices):            # list: "" is a substring of "ABCD"
+            return text
+        self.last_stats["error"] = "unparsed"   # blocked or empty reply: wrong, never "A"
+        return None
+
+
 # --------------------------------------------------------------------------- factory
 
 def build_backend(cfg: dict, answer_key: dict[str, str] | None = None) -> VLMBackend:
@@ -278,6 +392,7 @@ def build_backend(cfg: dict, answer_key: dict[str, str] | None = None) -> VLMBac
 
         backend = build_backend({"mock": "oracle"}, answer_key=key)
         backend = build_backend({"hf_id": "Qwen/Qwen2.5-VL-7B-Instruct"})
+        backend = build_backend({"hf_id": "gemini-2.5-flash"})   # API model, by name
     """
     if cfg.get("mock"):
         return MockBackend(
@@ -286,6 +401,16 @@ def build_backend(cfg: dict, answer_key: dict[str, str] | None = None) -> VLMBac
             accuracy=cfg.get("mock_accuracy", 0.4),
             seed=cfg.get("seed", 0),
             n_options=cfg.get("n_options", 4),
+        )
+    if cfg["hf_id"].startswith("gemini-"):
+        return GeminiBackend(
+            model=cfg["hf_id"],
+            max_frames=cfg.get("max_frames", 64),
+            fps=cfg.get("fps", 2.0),
+            short_side=cfg.get("short_side"),
+            seed=cfg.get("seed", 0),
+            thinking_budget=cfg.get("thinking_budget"),
+            api_key=cfg.get("api_key"),
         )
     return HFBackend(
         hf_id=cfg["hf_id"],

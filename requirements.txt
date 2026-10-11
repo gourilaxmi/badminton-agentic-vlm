@@ -1,6 +1,7 @@
 torch>=2.4
 transformers>=4.51
 accelerate
+google-genai          # Gemini reference runs only
 peft
 huggingface_hub[cli]
 decord

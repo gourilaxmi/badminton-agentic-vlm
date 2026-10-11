@@ -1,0 +1,15 @@
+{
+  "id": "gourilakshmi05/fbbench-gemini",
+  "title": "FBBench Gemini",
+  "code_file": "fbbench_gemini.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "dataset_sources": ["gourilakshmi05/bavlm-src"],
+  "competition_sources": [],
+  "kernel_sources": ["gourilakshmi05/finebadminton-frame-cache"],
+  "model_sources": []
+}
