@@ -119,8 +119,8 @@ added as collaborators on both kernels (kernel page → Share) to attach them.
 
 ```bash
 kaggle kernels push -p kernels/fbbench-zeroshot       # T4 x2, internet on, inputs attached
-kaggle kernels status gourilakshmi05/fbbench-zeroshot
-kaggle kernels output gourilakshmi05/fbbench-zeroshot -p ./out
+kaggle kernels status gourilakshmi05/fbbench-zero-shot
+kaggle kernels output gourilakshmi05/fbbench-zero-shot -p ./out
 ```
 
 Edit cell 1 for `BRANCH`, `EXPERIMENT`, `MODEL_ID`, `N_QUESTIONS`. Code comes from

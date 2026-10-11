@@ -13,7 +13,7 @@ contains is in `results/dataset_report.md`.
 | Gate | Due | State |
 |---|---|---|
 | **G1** dataset report, zero overlap, schema pinned | Mon 12 Oct | **Partial.** Report and schema done. The overlap check is not done: FBBench renames its clips, so it needs Finebadminton-20K plus a content fingerprint (open item 1 in the work log) |
-| **G2** one question answered end to end on Kaggle | Wed 14 Oct | Code ready and tested on CPU; Kaggle smoke test pending (below) |
+| **G2** one question answered end to end on Kaggle | Wed 14 Oct | **Done** Sun 11 Oct: 10-question smoke test on T4 × 2 (below) |
 | **G3** ≥500 questions scored, screening table | Fri 16 Oct | Not started |
 
 ---
@@ -25,7 +25,7 @@ contains is in `results/dataset_report.md`.
 | FBBench loader, pinned schema, per-domain + sub-task tags | `src/bavlm/eval/fbbench.py` | `tests/test_fbbench_real.py`: 2,413 questions load; oracle 100%, random 23.8%, refuse 0% in every domain |
 | Real model backend (Qwen2.5-VL), scored MCQ answers, token/frame stats | `src/bavlm/models/backend.py` (`HFBackend`) | `tests/test_hf_backend.py` on a tiny Qwen2.5-VL, CPU |
 | Frame cache: 2 FPS, short side 448, all FBBench clips | Kaggle kernel `gourilakshmi05/finebadminton-frame-cache` (`kernels/frame-cache/`) | v2 test run: 20 clips, 0 errors |
-| Zero-shot GPU run | Kaggle kernel `gourilakshmi05/fbbench-zeroshot` (`kernels/fbbench-zeroshot/`) | Full dry run on CPU with the tiny model; Kaggle smoke test pending |
+| Zero-shot GPU run | Kaggle kernel `gourilakshmi05/fbbench-zero-shot` (`kernels/fbbench-zeroshot/`) | Kaggle smoke test, 10 questions, v3 (11 Oct) |
 | Mock backends | `src/bavlm/models/backend.py` | `tests/test_mock_backend.py` |
 
 `python -m pytest tests/ -q` → 26 passed.
@@ -83,8 +83,8 @@ kaggle kernels push -p kernels/frame-cache
 
 # zero-shot run (T4 x2): set EXPERIMENT / N_QUESTIONS / BRANCH in cell 1 first
 kaggle kernels push -p kernels/fbbench-zeroshot
-kaggle kernels status gourilakshmi05/fbbench-zeroshot
-kaggle kernels output gourilakshmi05/fbbench-zeroshot -p ./out
+kaggle kernels status gourilakshmi05/fbbench-zero-shot
+kaggle kernels output gourilakshmi05/fbbench-zero-shot -p ./out
 ```
 
 - **Access:** the kernels live on Gouri's account and are private.
@@ -105,9 +105,8 @@ kaggle datasets version -p <dir> --dir-mode zip -m "src @ <sha>"
 
 ### Next steps, in roadmap order
 
-1. **G2:** confirm the 10-question smoke test result (below). Check the
-   answers, the token counts and the prediction distribution by hand. A
-   model answering one letter for everything is a red flag.
+1. **G2:** done (below). Attach the `GH_TOKEN` secret to the kernel so the
+   next run clones the branch and pushes its own results.
 2. **Merge `gouri` → `main`.** Then set `BRANCH = "main"` in
    `kernels/fbbench-zeroshot` cell 1.
 3. **Backbone sweep (Day 4):** add loaders for the other five families
@@ -131,4 +130,33 @@ kaggle datasets version -p <dir> --dir-mode zip -m "src @ <sha>"
 
 ## Kaggle smoke test (G2)
 
-_Pending: filled in after the run._
+Kernel `gourilakshmi05/fbbench-zero-shot` v3, Sun 11 Oct 2026, code
+snapshot `13a4d62`, Qwen2.5-VL-7B-Instruct fp16, uniform 2 FPS, short side 448.
+Result files are in `results/e00_smoke_*` (local only, gitignored); manifest row added.
+
+- **Pipeline:** 2,413/2,413 questions have cached frames. Mock check on Kaggle:
+  oracle 100%, random 23.8%, refuse 0%.
+- **Answers look real:** predictions B 5 · D 3 · C 1 · A 1 (gold D 3 · B 3 ·
+  A 2 · C 2). No single-letter collapse. Each prediction is the argmax of the
+  choice log-probs, which sum to 1 over the options.
+- **Cost:** 6–19 frames, mean 11.1; mean 2,728 input tokens. Visual tokens
+  are ~448 per frame *pair* (Qwen merges 2 frames temporally), so odd frame
+  counts pay for a padding frame. After the first question (155 s, model
+  warm-up) it runs at 2–10 s per question.
+- **6/10 correct.** n=10, one question per sub-task: this is a plumbing check,
+  not a result. Do not quote it.
+
+**Fixes needed to get here** (all in `kernels/fbbench-zeroshot/`):
+
+1. Kaggle stores the frame cache's 100k-file output as one 6.9 GB
+   `_output_.zip` and mounts it unextracted. Cell 8 now unpacks it to `/tmp`
+   (86–120 s per run). Publishing the cache as a Kaggle Dataset would remove
+   this step.
+2. The no-token snapshot fallback pointed `sys.path` one level too deep.
+3. Kaggle created the kernel slug from its title: `fbbench-zero-shot`, not
+   `fbbench-zeroshot`. Metadata and docs now use the real slug.
+
+**Watch for the full run:** the longest clip is 1,222 s (2,446 frames at
+2 FPS). `MAX_FRAMES = 64` subsamples it uniformly, which breaks the equal
+budget for that question (rule 4). List the clips over ~60 s and decide
+before the 500-question run.
