@@ -161,6 +161,27 @@ kernel now caps every clip at `MAX_FRAMES = 25`, the `budget_frames` in
 `configs/default.yaml`, so long rallies are subsampled uniformly to the same
 budget as every other method (rule 4).
 
+## Zero-shot baseline: Qwen2.5-VL-7B, 500 questions (e01, kernel v7)
+
+Sun 11 Oct, snapshot `39c567a`, fp16 on T4 × 2, uniform 2 FPS, short side 448,
+cap 25 frames. **0 errors** (the GQA fix removed every OOM). 44.7 min.
+
+| Domain | n | Accuracy | Frames | Input tokens | s/q |
+|---|---|---|---|---|---|
+| Count | 124 | **41.9%** | 21.1 | 5,001 | 7.2 |
+| Action | 126 | **21.4%** | 11.7 | 2,909 | 5.0 |
+| Position | 126 | **19.8%** | 10.3 | 2,542 | 3.5 |
+| Cognition | 124 | **33.9%** | 16.4 | 4,107 | 5.7 |
+
+Always-A on these 500: 23.4%. Predictions are spread (C 141, B 141, D 124,
+A 94). Action and Position sit at or below chance: the model cannot yet read
+stroke type or court position from 448-px frames. Weakest sub-tasks: action
+prediction and hitting prediction (11.9%). Per-sub-task table:
+`results/e01_zeroshot_by_subtask.csv` (local, from the kernel output).
+
+The 150-question backbone screen uses the first 150 of the same round-robin
+order, so this run's first 150 rows are Qwen2.5-VL-7B's screening entry.
+
 ## First 500-question run (e01, kernel v6): invalid
 
 Sun 11 Oct, snapshot `5f28597`. **138/500 questions hit CUDA OOM** and were
