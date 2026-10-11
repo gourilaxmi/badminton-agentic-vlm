@@ -107,7 +107,8 @@ docs/               HANDOFF.md, NOVELTY.md, ROADMAP.md, architecture.png
 scripts/            00_verify_dataset · 01_zeroshot_benchmark ·
                     01b_backbone_sweep · 02_reproduce_baseline ·
                     03_run_agent · 04_faithfulness · extract_frames.py
-notebooks/          fbbench_zeroshot_kaggle.ipynb
+kernels/            Kaggle kernels, pushed with `kaggle kernels push -p <dir>`:
+                    frame-cache/ (CPU, builds frames) · fbbench-zeroshot/ (T4 x2)
 src/bavlm/
   data/schema.py    Plan / Evidence / Reflection / Trace    [working]
   data/splits.py    overlap check, label vocabulary          [working]

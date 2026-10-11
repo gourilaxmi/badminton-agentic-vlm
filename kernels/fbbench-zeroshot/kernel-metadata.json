@@ -1,0 +1,16 @@
+{
+  "id": "gourilakshmi05/fbbench-zeroshot",
+  "title": "FBBench zero-shot",
+  "code_file": "fbbench_zeroshot.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": ["gourilakshmi05/bavlm-src"],
+  "competition_sources": [],
+  "kernel_sources": ["gourilakshmi05/finebadminton-frame-cache"],
+  "model_sources": []
+}

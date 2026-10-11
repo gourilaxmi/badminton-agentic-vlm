@@ -106,24 +106,138 @@ class MockBackend:
 
 # --------------------------------------------------------------------------- real
 
-class HFBackend:
-    """Real model. Loaded lazily so importing this module costs nothing."""
+_TS_MS = re.compile(r"_(\d+)\.jpe?g$", re.IGNORECASE)
 
-    def __init__(self, hf_id: str, dtype: str = "bfloat16", max_frames: int = 32) -> None:
+
+def frames_fps(paths: Sequence, default: float) -> float:
+    """Sampling rate of a frame list, from the `<i>_<ms>.jpg` cache names.
+
+    Qwen2.5-VL puts absolute time into its position encoding, so the processor
+    must be told the real rate. Left unset, transformers assumes 24 fps and a
+    5 s clip at 2 FPS reads to the model as 0.4 s.
+    """
+    ts = [int(m.group(1)) for p in paths if (m := _TS_MS.search(str(p)))]
+    if len(ts) == len(paths) and len(ts) > 1 and ts[-1] > ts[0]:
+        return (len(ts) - 1) / ((ts[-1] - ts[0]) / 1000)
+    return default
+
+
+class HFBackend:
+    """Real model via transformers. Loaded lazily so importing this costs nothing.
+
+    Tested with Qwen2.5-VL on transformers 5.19.0; the Kaggle notebook pins that
+    version, because video-processor defaults (fps, pixel caps) have changed
+    between releases and silently change what the model sees.
+
+    MCQ answers are scored, not parsed: one forward pass, then the highest
+    next-token logit among the option letters. That is guided decoding at its
+    simplest -- deterministic (rule 9), never unparseable, no extra library.
+    Free-form generation is kept for open-ended questions.
+
+    Every call records `last_stats` (input and visual tokens, frames used) so
+    efficiency is reported in tokens and frames, not wall-clock (rule 6).
+    """
+
+    def __init__(self, hf_id: str, dtype: str = "float16", max_frames: int = 64,
+                 fps: float = 2.0, short_side: int | None = None,
+                 device_map: str = "auto", attn_implementation: str = "sdpa") -> None:
         self.name = hf_id
         self.hf_id = hf_id
-        self.dtype = dtype          # NOTE: use "float16" on Kaggle P100/T4 -- no bf16
+        self.dtype = dtype          # T4 is sm_75: float16. bf16 needs sm_80+
         self.max_frames = max_frames
+        self.fps = fps              # fallback when frame names carry no timestamps
+        self.short_side = short_side  # resolution sweep: downscale at load, never upscale
+        self.device_map = device_map
+        self.attn_implementation = attn_implementation
         self._model = None
         self._proc = None
+        self.last_stats: dict = {}
 
-    def _load(self):
-        raise NotImplementedError("roadmap phase 1 -- wire transformers or vLLM here")
+    def _load(self) -> None:
+        import torch
+        from transformers import AutoModelForImageTextToText, AutoProcessor
 
-    def generate(self, frames: Sequence, prompt: str, **kw) -> str:
+        self._proc = AutoProcessor.from_pretrained(self.hf_id)
+        self._model = AutoModelForImageTextToText.from_pretrained(
+            self.hf_id,
+            dtype=getattr(torch, self.dtype),
+            device_map=self.device_map,
+            attn_implementation=self.attn_implementation,
+        ).eval()
+        tok = self._proc.tokenizer
+        self._video_pad = tok.convert_tokens_to_ids("<|video_pad|>")
+
+    def _letter_ids(self, letters: Sequence[str]) -> list[int]:
+        ids = []
+        for L in letters:
+            enc = self._proc.tokenizer.encode(L, add_special_tokens=False)
+            if len(enc) != 1:
+                raise ValueError(f"option letter {L!r} is not a single token: {enc}")
+            ids.append(enc[0])
+        return ids
+
+    def _frames(self, frames: Sequence) -> tuple[list, list]:
+        """Load paths to RGB images; cap the count uniformly, never silently."""
+        from PIL import Image
+
+        if len(frames) > self.max_frames:
+            step = len(frames) / self.max_frames
+            frames = [frames[int(i * step)] for i in range(self.max_frames)]
+        imgs = []
+        for f in frames:
+            im = Image.open(f).convert("RGB") if isinstance(f, (str, bytes)) or hasattr(f, "__fspath__") else f
+            if self.short_side and min(im.size) > self.short_side:
+                s = self.short_side / min(im.size)
+                im = im.resize((round(im.size[0] * s), round(im.size[1] * s)), Image.BICUBIC)
+            imgs.append(im)
+        return list(frames), imgs
+
+    def _inputs(self, frames: Sequence, prompt: str):
+        used, imgs = self._frames(frames)
+        content = ([{"type": "video"}] if imgs else []) + [{"type": "text", "text": prompt}]
+        text = self._proc.apply_chat_template([{"role": "user", "content": content}],
+                                              tokenize=False, add_generation_prompt=True)
+        kw: dict = {}
+        if imgs:
+            fps = frames_fps(used, self.fps)
+            kw = {"videos": [imgs], "do_sample_frames": False, "cap_pixels_per_frame": True,
+                  "video_metadata": [{"total_num_frames": len(imgs), "fps": fps,
+                                      "frames_indices": list(range(len(imgs)))}]}
+        inputs = self._proc(text=[text], return_tensors="pt", **kw).to(self._model.device)
+        ids = inputs["input_ids"]
+        self.last_stats = {
+            "n_frames_in": len(frames),
+            "n_frames": len(imgs),
+            "input_tokens": int(ids.shape[1]),
+            "visual_tokens": int((ids == self._video_pad).sum()),
+            "frame_wh": list(imgs[0].size) if imgs else None,
+        }
+        if imgs:
+            self.last_stats["fps"] = round(kw["video_metadata"][0]["fps"], 3)
+        return inputs
+
+    def generate(self, frames: Sequence, prompt: str, choices: Sequence[str] | None = None,
+                 max_new_tokens: int = 64, **kw) -> str:
+        """With `choices` (e.g. "ABCD"), return the best-scoring letter.
+        Without, greedy free-form generation."""
+        import torch
+
         if self._model is None:
             self._load()
-        raise NotImplementedError("roadmap phase 1")
+        inputs = self._inputs(frames, prompt)
+
+        with torch.inference_mode():
+            if choices:
+                ids = self._letter_ids(choices)
+                logits = self._model(**inputs, logits_to_keep=1).logits[0, -1].float()
+                lp = torch.log_softmax(logits, dim=-1)[ids]
+                self.last_stats["choice_logprobs"] = {c: round(float(v), 4) for c, v in zip(choices, lp)}
+                return choices[int(lp.argmax())]
+
+            out = self._model.generate(**inputs, do_sample=False, max_new_tokens=max_new_tokens)
+            new = out[0, inputs["input_ids"].shape[1]:]
+            self.last_stats["output_tokens"] = int(new.shape[0])
+            return self._proc.tokenizer.decode(new, skip_special_tokens=True)
 
 
 # --------------------------------------------------------------------------- factory
@@ -144,8 +258,12 @@ def build_backend(cfg: dict, answer_key: dict[str, str] | None = None) -> VLMBac
         )
     return HFBackend(
         hf_id=cfg["hf_id"],
-        dtype=cfg.get("dtype", "bfloat16"),
-        max_frames=cfg.get("max_frames", 32),
+        dtype=cfg.get("dtype", "float16"),
+        max_frames=cfg.get("max_frames", 64),
+        fps=cfg.get("fps", 2.0),
+        short_side=cfg.get("short_side"),
+        device_map=cfg.get("device_map", "auto"),
+        attn_implementation=cfg.get("attn_implementation", "sdpa"),
     )
 
 

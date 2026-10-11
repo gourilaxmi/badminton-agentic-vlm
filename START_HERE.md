@@ -70,7 +70,8 @@ the data.
 | `scripts/00_verify_dataset.py` | **Run this first.** Overlap check and label vocabulary |
 | `scripts/extract_frames.py` | Frame cache builder — laptop, CPU, once |
 | `scripts/01b_backbone_sweep.py` | Screen six backbones on 150 stratified questions |
-| `notebooks/fbbench_zeroshot_kaggle.ipynb` | Upload to Kaggle, edit three config lines, run |
+| `kernels/frame-cache/` | Kaggle CPU kernel: builds the 2 FPS frame cache from FBBench's own clips |
+| `kernels/fbbench-zeroshot/` | Kaggle T4 × 2 kernel: zero-shot run, per-domain scores, pushes results |
 | `configs/backbones.yaml` | The six candidate models with notes on each |
 
 ### Stubs, each naming its roadmap phase

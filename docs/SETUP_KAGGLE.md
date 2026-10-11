@@ -89,72 +89,44 @@ a saved version.
 
 ---
 
-## Step 4 · Build the frame cache (laptop, CPU, ~1 hour)
+## Step 4 · Build the frame cache (Kaggle CPU kernel, ~1 hour, no laptop)
 
-The single biggest saving. Video decoding is CPU work — doing it inside a GPU
-session burns quota on something a laptop does for free.
+> Updated 11 Oct: FBBench ships its own clips, so Finebadminton-20K is not
+> needed for the evaluation cache, and the cache is built on Kaggle directly.
+> See `results/dataset_report.md`.
 
 ```bash
-hf download Moujuruo/FineBadmintonBenchmark --repo-type dataset --local-dir data/fbbench
-hf download Moujuruo/Finebadminton-20K      --repo-type dataset --local-dir data/finebadminton-20k
-
-python scripts/extract_frames.py \
-    --fbbench data/fbbench \
-    --clips   data/finebadminton-20k \
-    --out     ./frame_cache \
-    --fps 2 --size 224
+kaggle kernels push -p kernels/frame-cache            # LIMIT=None in cell 1 = all 2,413 clips
+kaggle kernels status gourilakshmi05/finebadminton-frame-cache
 ```
 
-Extract **only clips FBBench references**, not all 3,215.
-
-Expected size: 25 frames × ~15 KB ≈ 375 KB per clip, so roughly **1.2 GB** at
-224 px (about 5 GB at 448).
+Output: `frames/<video_uid>/<i:03d>_<ms:07d>.jpg` at 2 FPS, short side 448,
+plus `frames/manifest.json` and `fbbench/` (question JSONs only). Set
+`LIMIT = 20` in cell 1 for a quick test run.
 
 ---
 
-## Step 5 · Upload the cache as a Kaggle Dataset
+## Step 5 · No upload needed
 
-```bash
-pip install kaggle
-# token from kaggle.com → Settings → API → Create New Token
-# save the downloaded kaggle.json to ~/.kaggle/kaggle.json, chmod 600
-
-kaggle datasets init -p ./frame_cache
-```
-
-Edit the generated `dataset-metadata.json`:
-
-```json
-{
-  "title": "FineBadminton frames 2fps 224",
-  "id": "<your-kaggle-username>/finebadminton-frames",
-  "licenses": [{"name": "other"}]
-}
-```
-
-```bash
-kaggle datasets create -p ./frame_cache --dir-mode zip
-```
-
-Upload takes 10–30 minutes. Do it once; every run afterwards attaches it in
-seconds.
+The GPU kernel attaches the frame-cache kernel's output directly
+(`kernel_sources` in `kernels/fbbench-zeroshot/kernel-metadata.json`). There
+is no Kaggle Dataset to create and no upload to wait for. Teammates need to be
+added as collaborators on both kernels (kernel page → Share) to attach them.
 
 ---
 
-## Step 6 · Notebook settings
+## Step 6 · Run the zero-shot kernel
 
-Upload `fbbench_zeroshot_kaggle.ipynb` (File → Import Notebook), then in the
-right-hand panel:
+```bash
+kaggle kernels push -p kernels/fbbench-zeroshot       # T4 x2, internet on, inputs attached
+kaggle kernels status gourilakshmi05/fbbench-zeroshot
+kaggle kernels output gourilakshmi05/fbbench-zeroshot -p ./out
+```
 
-| Setting | Value |
-|---|---|
-| Accelerator | **GPU T4 x2** |
-| Internet | **On** |
-| Persistence | Variables and Files |
-| Environment | Always use latest |
-
-Then **Add data → Your Datasets →** attach `finebadminton-frames`.
-It mounts read-only at `/kaggle/input/finebadminton-frames`.
+Edit cell 1 for `BRANCH`, `EXPERIMENT`, `MODEL_ID`, `N_QUESTIONS`. Code comes from
+GitHub when the `GH_TOKEN` secret is attached to the kernel (attach it once in the
+kernel editor: Add-ons → Secrets), and results are pushed back. Without it, the
+attached `bavlm-src` snapshot is used and results stay in the kernel output.
 
 ---
 
