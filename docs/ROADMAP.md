@@ -94,10 +94,10 @@ Everything here is unblocking work. None of it needs the data.
 
 ## Day 1 · Mon 12 Oct — dataset integrity
 
-- [ ] **D1** `python scripts/00_verify_dataset.py` → commit `results/dataset_report.md`
+- [x] **D1** `python scripts/00_verify_dataset.py` → commit `results/dataset_report.md` — *report written by hand (gouri, 11 Oct); FBBench part only, see STATUS.md*
 - [ ] **D1** **Clip-overlap check between Finebadminton-20K and FBBench**
-- [ ] **D1** Record HF revision hashes in `results/MANIFEST.md`
-- [ ] **D2** `describe_schema()` on the real data → **pin `_FIELD_CANDIDATES` in `fbbench.py`**
+- [~] **D1** Record HF revision hashes in `results/MANIFEST.md` — *FBBench done (gouri, 11 Oct); 20K open*
+- [x] **D2** `describe_schema()` on the real data → **pin `_FIELD_CANDIDATES` in `fbbench.py`** — *now `FIELDS` + `SUBTASKS` (gouri, 11 Oct)*
 - [ ] **D2** Dump the real label vocabulary — 11 hit types, 20 subtypes, 9 regions
 - [ ] **D3** Count clips carrying Decision Evaluation annotations
 - [ ] **D4** Multiple-choice prompt v1, frozen and committed
@@ -110,20 +110,20 @@ Everything here is unblocking work. None of it needs the data.
 
 ## Day 2 · Tue 13 Oct — frames and scorer
 
-- [ ] **D1** `extract_frames.py --limit 10` → inspect what landed on disk
+- [x] **D1** `extract_frames.py --limit 10` → inspect what landed on disk — *Kaggle kernel `kernels/frame-cache`, LIMIT=20 (gouri, 11 Oct)*
 - [ ] **D1** Full extraction **at `--size 448`** (downscale at load time; you
       cannot upscale later, and re-extracting costs 25 min plus a 70 min re-upload)
-- [ ] **D1** Upload as a Kaggle Dataset
-- [ ] **D2** `VLMBackend` real path: Qwen2.5-VL loader wired
-- [ ] **D4** FBBench scorer + guided decoding + per-domain tagging
+- [x] **D1** Upload as a Kaggle Dataset — *not needed: the GPU kernel attaches the frame-cache kernel output (gouri, 11 Oct)*
+- [x] **D2** `VLMBackend` real path: Qwen2.5-VL loader wired — *gouri, 11 Oct*
+- [x] **D4** FBBench scorer + guided decoding + per-domain tagging — *letter log-prob scoring (gouri, 11 Oct)*
 - [ ] **D3** Planner / observer / reflector prompts drafted (for Day 6)
 
 ---
 
 ## Day 3 · Wed 14 Oct — mock passes, then first GPU contact
 
-- [ ] **D4** **Mock mode: oracle 100%, random ~25%, refuse 0%**
-- [ ] **D2** Notebook wired: clone, secrets, attach dataset, push results
+- [x] **D4** **Mock mode: oracle 100%, random ~25%, refuse 0%** — *on all 2,413 real questions (gouri, 11 Oct)*
+- [x] **D2** Notebook wired: clone, secrets, attach dataset, push results — *`kernels/fbbench-zeroshot` (gouri, 11 Oct)*
 - [ ] **D2** Kaggle smoke test — ten questions end to end on T4 × 2
 - [ ] **D1** `results/MANIFEST.md` format agreed and in use
 

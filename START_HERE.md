@@ -36,6 +36,7 @@ the data.
 
 | File | What it is |
 |---|---|
+| **`STATUS.md`** | **Where the project stands right now and how to proceed.** Who did what: `docs/WORKLOG.md` |
 | **`CLAUDE.md`** | Project context. Claude Code reads this automatically at the start of **every** session — yours and your teammates'. Keep it current |
 | **`docs/HANDOFF.md`** | The full brief: novelty, all 11 papers with venues, datasets, hardware, architecture, the twelve rules, stock answers for panel questions |
 | **`docs/ROADMAP.md`** | Day-by-day plan to Review 2, then Sprints B and C to March |
