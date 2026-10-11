@@ -156,7 +156,26 @@ Result files are in `results/e00_smoke_*` (local only, gitignored); manifest row
 3. Kaggle created the kernel slug from its title: `fbbench-zero-shot`, not
    `fbbench-zeroshot`. Metadata and docs now use the real slug.
 
-**Watch for the full run:** the longest clip is 1,222 s (2,446 frames at
-2 FPS). `MAX_FRAMES = 64` subsamples it uniformly, which breaks the equal
-budget for that question (rule 4). List the clips over ~60 s and decide
-before the 500-question run.
+**Frame budget:** the longest clip is 1,222 s (2,446 frames at 2 FPS). The
+kernel now caps every clip at `MAX_FRAMES = 25`, the `budget_frames` in
+`configs/default.yaml`, so long rallies are subsampled uniformly to the same
+budget as every other method (rule 4).
+
+## First 500-question run (e01, kernel v6): invalid
+
+Sun 11 Oct, snapshot `5f28597`. **138/500 questions hit CUDA OOM** and were
+scored wrong, so its 19.6% overall must not be reported. The OOMs were every
+input of 4,885+ tokens (long rallies: round count, detailed hitting count,
+point reason, round comment); every input up to 4,768 tokens ran.
+
+Cause, measured with a GPU probe kernel (`gourilakshmi05/sdpa-probe`): with no
+attention mask, transformers passes `enable_gqa=True` to SDPA. On a T4 only
+the math kernel accepts that, and it materialises the attention matrix:
++5.8 GiB at 4.8k tokens, OOM (21.6 GiB) at 14.4k. Repeating the kv heads first
+lets the memory-efficient kernel run: +0.1 GiB at 14.4k.
+`avoid_gqa_math_fallback` in `backend.py` does this on pre-Ampere GPUs.
+
+On the 362 answered questions, accuracy was 18–33% by domain against an
+always-A rate of 22.4% on the same subset. That is consistent with the
+paper's "< 25%" for 7B zero-shot, but it is a biased subset; wait for the
+rerun.

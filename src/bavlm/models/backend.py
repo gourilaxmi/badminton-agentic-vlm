@@ -122,6 +122,25 @@ def frames_fps(paths: Sequence, default: float) -> float:
     return default
 
 
+def avoid_gqa_math_fallback(capability: tuple[int, int] | None) -> bool:
+    """On pre-Ampere GPUs, stop transformers passing `enable_gqa=True` to SDPA.
+
+    With no attention mask (batch 1, no padding) transformers lets SDPA handle
+    grouped-query attention itself. On a T4 (sm_75) the only kernel that accepts
+    `enable_gqa` is the math one, which materialises the full attention matrix:
+    measured +5.8 GiB at 4.8k tokens and an OOM at 14.4k for Qwen2.5-VL-7B's
+    shape (28 query heads, 4 kv heads). Repeating the kv heads first lets the
+    memory-efficient kernel run instead: +0.1 GiB at 14.4k. Same arithmetic,
+    same outputs; only the kernel changes. Returns whether the patch applied.
+    """
+    if capability is None or capability >= (8, 0):
+        return False
+    from transformers.integrations import sdpa_attention
+
+    sdpa_attention.use_gqa_in_sdpa = lambda *a, **k: False
+    return True
+
+
 class HFBackend:
     """Real model via transformers. Loaded lazily so importing this costs nothing.
 
@@ -161,6 +180,8 @@ class HFBackend:
         import torch
         from transformers import AutoModelForImageTextToText, AutoProcessor
 
+        if torch.cuda.is_available():
+            avoid_gqa_math_fallback(torch.cuda.get_device_capability(0))
         self._proc = AutoProcessor.from_pretrained(self.hf_id)
         self._model = AutoModelForImageTextToText.from_pretrained(
             self.hf_id,

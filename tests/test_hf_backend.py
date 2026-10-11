@@ -14,7 +14,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
 import pytest
 
-from bavlm.models.backend import HFBackend, build_backend, frames_fps  # noqa: E402
+from bavlm.models.backend import HFBackend, avoid_gqa_math_fallback, build_backend, frames_fps  # noqa: E402
 
 TINY = "trl-internal-testing/tiny-Qwen2_5_VLForConditionalGeneration"
 
@@ -46,6 +46,17 @@ def test_factory_defaults_suit_a_t4():
     assert isinstance(be, HFBackend)
     assert be.dtype == "float16" and be.attn_implementation == "sdpa"
     assert be._model is None                      # lazy: nothing loaded yet
+
+
+def test_gqa_patch_only_below_ampere(monkeypatch):
+    sdpa = pytest.importorskip("transformers.integrations.sdpa_attention")
+    original = sdpa.use_gqa_in_sdpa
+    monkeypatch.setattr(sdpa, "use_gqa_in_sdpa", original)   # undo after the test
+    assert not avoid_gqa_math_fallback(None)                  # CPU
+    assert not avoid_gqa_math_fallback((8, 0))                # A100: GQA kernels exist
+    assert sdpa.use_gqa_in_sdpa is original
+    assert avoid_gqa_math_fallback((7, 5))                    # T4
+    assert sdpa.use_gqa_in_sdpa(None, None, None) is False
 
 
 # ------------------------------------------------------------------ tiny model
