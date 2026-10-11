@@ -103,19 +103,23 @@ git rev-parse --short HEAD > <dir>/COMMIT
 kaggle datasets version -p <dir> --dir-mode zip -m "src @ <sha>"
 ```
 
-### Next steps, in roadmap order
+### Next steps, in roadmap order (Review 2 freeze: Sun 18 Oct)
 
-1. **G2:** done (below). Attach the `GH_TOKEN` secret to the kernel so the
-   next run clones the branch and pushes its own results.
-2. **Merge `gouri` → `main`.** Then set `BRANCH = "main"` in
-   `kernels/fbbench-zeroshot` cell 1.
-3. **Backbone sweep (Day 4):** add loaders for the other five families
-   (open items 6–7 in the work log).
-4. **Full run (Day 5):** `EXPERIMENT = "e01_zeroshot"`, `N_QUESTIONS = 500`.
-   **Resolution sweep:** `SHORT_SIDE` = 224 / 336 / None at 50 questions
-   each.
-5. **G1 overlap check:** open item 1, needs a decision on downloading
-   Finebadminton-20K.
+1. **e03:** Qwen3-VL-8B on the 500 e01 questions (kernel v9, running).
+   Confirms or overturns the e02 pick with ~125 questions per domain.
+2. **e04, Gemini reference:** `kernels/fbbench-gemini`, CPU, same 500
+   questions. Needs the `GEMINI_API_KEY` secret and a run started in the
+   editor (Save Version → Save & Run All); CLI-started runs get no secrets.
+3. **Resolution sweep:** `SHORT_SIDE` = 224 / 336 / None on the chosen
+   backbone. Position is at chance for every model so far; this tests whether
+   resolution is why.
+4. **More backbones (optional):** InternVL3.5-8B, VideoLLaMA3-7B. Only if
+   e03 is weak; each needs its own video input path.
+5. **Loop demo:** the Review 2 slide shows the planned loop on one rally.
+   Do not build the loop itself before Review 3.
+6. **G1 overlap check:** needs Finebadminton-20K downloaded (rule 2).
+7. **Housekeeping:** set `BRANCH = "main"` in the kernels; secrets do not
+   reach CLI runs, so results are copied from the kernel output by hand.
 
 ### Decisions the team owes
 
