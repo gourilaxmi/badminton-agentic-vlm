@@ -111,6 +111,18 @@ so the open question is whether **more** pixels help.
   the bottleneck is not pixels, which motivates the agent's query-conditioned
   look (zoom, crop, pose) in Review 3.
 
+### 3b. Denser frames within the same 25-frame budget (Count, Action)
+
+Error analysis of e03: frames are 0.5 s apart at 2 FPS, so most racket
+contacts fall between frames. The model under-counts detailed hitting count
+73% of the time (over-counts 2%), and confuses shots that look alike in a still
+frame. Yet Action and Position clips use only ~12 and ~10 of the 25 allowed
+frames, because the clips are short. Test: a frame cache at **6 FPS**
+(`kernels/frame-cache`, copied to a new id, `FPS = 6`), still capped at 25
+frames, so no comparison uses more frames than the paper's budget (rule 4).
+Run the same 500 questions. If Count and Action rise, it is evidence that
+*when* the frames are taken matters, which is the agent's premise.
+
 ### 4. Hand-check 20 scored answers (D4, about 1 h, laptop)
 
 From `results/e03_zeroshot_Qwen3-VL-8B-Instruct.jsonl` (in the repo: every
