@@ -5,8 +5,8 @@ venv/
 .env
 
 # data is downloaded, never committed
-data/
-!data/.gitkeep
+/data/
+!/data/.gitkeep
 
 # run outputs
 results/*

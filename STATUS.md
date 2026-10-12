@@ -12,9 +12,9 @@ contains is in `results/dataset_report.md`.
 
 | Gate | Due | State |
 |---|---|---|
-| **G1** dataset report, zero overlap, schema pinned | Mon 12 Oct | **Partial.** Report and schema done. The overlap check is not done: FBBench renames its clips, so it needs Finebadminton-20K plus a content fingerprint (open item 1 in the work log) |
+| **G1** dataset report, zero overlap, schema pinned | Mon 12 Oct | **Done** Mon 12 Oct. FBBench's 20 source matches (published with the 20K release) are held out; training uses the other 50, split by match in `configs/split_20k.json`. Label vocabulary matches the paper. See `results/dataset_report.md`. A frame-fingerprint spot check before fine-tuning is still advised |
 | **G2** one question answered end to end on Kaggle | Wed 14 Oct | **Done** Sun 11 Oct: 10-question smoke test on T4 × 2 (below) |
-| **G3** ≥500 questions scored, screening table | Fri 16 Oct | Not started |
+| **G3** ≥500 questions scored, screening table | Fri 16 Oct | **Done** Sun 11 Oct: e01, e02, e03 (below) |
 
 ---
 
@@ -116,7 +116,8 @@ kaggle datasets version -p <dir> --dir-mode zip -m "src @ <sha>"
    e03 is weak; each needs its own video input path.
 5. **Loop demo:** the Review 2 slide shows the planned loop on one rally.
    Do not build the loop itself before Review 3.
-6. **G1 overlap check:** needs Finebadminton-20K downloaded (rule 2).
+6. **G1 overlap check:** done (`scripts/00_verify_dataset.py`). Before
+   fine-tuning: frame-fingerprint spot check against the 50 training matches.
 7. **Housekeeping:** set `BRANCH = "main"` in the kernels; secrets do not
    reach CLI runs, so results are copied from the kernel output by hand.
 

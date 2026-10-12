@@ -95,10 +95,10 @@ Everything here is unblocking work. None of it needs the data.
 ## Day 1 · Mon 12 Oct — dataset integrity
 
 - [x] **D1** `python scripts/00_verify_dataset.py` → commit `results/dataset_report.md` — *report written by hand (gouri, 11 Oct); FBBench part only, see STATUS.md*
-- [ ] **D1** **Clip-overlap check between Finebadminton-20K and FBBench**
-- [~] **D1** Record HF revision hashes in `results/MANIFEST.md` — *FBBench done (gouri, 11 Oct); 20K open*
+- [x] **D1** **Clip-overlap check between Finebadminton-20K and FBBench** — *by match: FBBench's 20 source matches held out, 50 left for training (gouri, 12 Oct)*
+- [x] **D1** Record HF revision hashes in `results/MANIFEST.md` — *both done (gouri, 11–12 Oct)*
 - [x] **D2** `describe_schema()` on the real data → **pin `_FIELD_CANDIDATES` in `fbbench.py`** — *now `FIELDS` + `SUBTASKS` (gouri, 11 Oct)*
-- [ ] **D2** Dump the real label vocabulary — 11 hit types, 20 subtypes, 9 regions
+- [x] **D2** Dump the real label vocabulary — 11 hit types, 20 subtypes, 9 regions — *confirmed, plus a few noisy labels (gouri, 12 Oct)*
 - [ ] **D3** Count clips carrying Decision Evaluation annotations
 - [ ] **D4** Multiple-choice prompt v1, frozen and committed
 
