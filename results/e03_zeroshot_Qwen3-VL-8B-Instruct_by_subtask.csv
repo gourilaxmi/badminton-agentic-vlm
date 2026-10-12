@@ -1,0 +1,13 @@
+domain,subtask,n,accuracy,frames,input_tokens,sec_per_q
+action,action classification,42,0.286,8.548,1803.0,5.795
+action,action localization,42,0.357,13.929,2710.024,3.564
+action,action prediction,42,0.19,12.571,2530.69,3.274
+cognition,hitting comment,42,0.524,9.738,2086.905,2.64
+cognition,point reason,41,0.61,20.585,4059.098,5.42
+cognition,round comment,41,0.366,19.0,3875.634,5.127
+count,detailed hitting count,41,0.244,21.293,4031.317,5.495
+count,hitting count,42,0.452,18.381,3507.333,4.754
+count,round count,41,0.537,23.683,4508.805,6.16
+position,hitting localization,42,0.143,10.024,1983.595,2.533
+position,hitting prediction,42,0.167,6.119,1279.857,1.584
+position,moving recognition,42,0.262,14.738,2873.881,3.801

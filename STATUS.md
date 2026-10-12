@@ -4,7 +4,9 @@ Where the project stands and how to pick it up. Read this after
 `START_HERE.md`. Who did what is in `docs/WORKLOG.md`; what the data actually
 contains is in `results/dataset_report.md`.
 
-**Last updated:** Sun 11 Oct 2026 (Day 0 of Sprint A) · **Review 2:** Wed 21 Oct · **Freeze:** Sun 18 Oct
+**Last updated:** Mon 12 Oct 2026 · **Review 2:** Wed 21 Oct · **Freeze:** Sun 18 Oct
+
+**Picking this up? Start with `docs/HANDOVER.md`**: what is done, and the next steps in order.
 
 ---
 
@@ -23,16 +25,18 @@ contains is in `results/dataset_report.md`.
 | Piece | Where | Verified by |
 |---|---|---|
 | FBBench loader, pinned schema, per-domain + sub-task tags | `src/bavlm/eval/fbbench.py` | `tests/test_fbbench_real.py`: 2,413 questions load; oracle 100%, random 23.8%, refuse 0% in every domain |
-| Real model backend (Qwen2.5-VL), scored MCQ answers, token/frame stats | `src/bavlm/models/backend.py` (`HFBackend`) | `tests/test_hf_backend.py` on a tiny Qwen2.5-VL, CPU |
+| Real model backend (Qwen2.5-VL, Qwen3-VL), scored MCQ answers, token/frame stats | `src/bavlm/models/backend.py` (`HFBackend`) | `tests/test_hf_backend.py` on tiny Qwen2.5-VL and Qwen3-VL, CPU; e01–e05 on Kaggle |
+| Gemini reference backend, enum-constrained answers | `src/bavlm/models/backend.py` (`GeminiBackend`) | `tests/test_gemini_backend.py` with a fake client |
+| 20K overlap check, match split, label vocabulary | `src/bavlm/data/splits.py`, `scripts/00_verify_dataset.py` | `tests/test_splits.py` (synthetic + real release) |
 | Frame cache: 2 FPS, short side 448, all FBBench clips | Kaggle kernel `gourilakshmi05/finebadminton-frame-cache` (`kernels/frame-cache/`) | v2 test run: 20 clips, 0 errors |
-| Zero-shot GPU run | Kaggle kernel `gourilakshmi05/fbbench-zero-shot` (`kernels/fbbench-zeroshot/`) | Kaggle smoke test, 10 questions, v3 (11 Oct) |
+| Zero-shot GPU run: several models and resolutions in one session | Kaggle kernel `gourilakshmi05/fbbench-zero-shot` (`kernels/fbbench-zeroshot/`) | e01–e05, 0 errors since v7 |
 | Mock backends | `src/bavlm/models/backend.py` | `tests/test_mock_backend.py` |
 
-`python -m pytest tests/ -q` → 26 passed.
+`python -m pytest tests/ -q` → 50 passed (41 + 9 skipped on a fresh clone without `data/`).
 
 **Still stubs** (each raises `NotImplementedError` naming its phase):
 `data/loader.py`, `eval/metrics.py`, `sampling/hit_centric.py`, `agent/{observer,reflector,loop}.py`,
-`tools/{pose,tracker}.py`, `scripts/0{1,2,3,4}_*.py`.
+`tools/{pose,tracker}.py`, `scripts/0{1,1b,2,3,4}_*.py` (the Kaggle notebook replaces 01 and 01b).
 
 ---
 
@@ -90,10 +94,11 @@ kaggle kernels output gourilakshmi05/fbbench-zero-shot -p ./out
 - **Access:** the kernels live on Gouri's account and are private.
   Teammates need to be added as collaborators (kernel page → Share) to see
   or attach them.
-- **Getting results to GitHub:** attach the `GH_TOKEN` secret to
-  `fbbench-zeroshot` once, in the kernel editor (Add-ons → Secrets).
-  Results then push to GitHub automatically. Without it, the kernel runs
-  from the `bavlm-src` code snapshot and results stay in the kernel output.
+- **Getting results to GitHub:** Kaggle passes secrets (`GH_TOKEN`) only to
+  runs started in the editor, never to `kaggle kernels push` runs. CLI runs
+  therefore use the `bavlm-src` code snapshot and leave results in the kernel
+  output: download them, copy to `results/`, `git add -f results/`, commit.
+  `kaggle kernels output` only returns the latest version.
 - **Refreshing the snapshot:** the snapshot is a copy of `src/`, so refresh
   it after code changes:
 
@@ -103,23 +108,12 @@ git rev-parse --short HEAD > <dir>/COMMIT
 kaggle datasets version -p <dir> --dir-mode zip -m "src @ <sha>"
 ```
 
-### Next steps, in roadmap order (Review 2 freeze: Sun 18 Oct)
+### Next steps
 
-1. **e03:** done. Qwen3-VL-8B confirmed as the backbone (above).
-2. **e04, Gemini reference:** `kernels/fbbench-gemini`, CPU, same 500
-   questions. Needs the `GEMINI_API_KEY` secret and a run started in the
-   editor (Save Version → Save & Run All); CLI-started runs get no secrets.
-3. **Resolution sweep:** `SHORT_SIDE` = 224 / 336 / None on the chosen
-   backbone. Position is at chance for every model so far; this tests whether
-   resolution is why.
-4. **More backbones (optional):** InternVL3.5-8B, VideoLLaMA3-7B. Only if
-   e03 is weak; each needs its own video input path.
-5. **Loop demo:** the Review 2 slide shows the planned loop on one rally.
-   Do not build the loop itself before Review 3.
-6. **G1 overlap check:** done (`scripts/00_verify_dataset.py`). Before
-   fine-tuning: frame-fingerprint spot check against the 50 training matches.
-7. **Housekeeping:** set `BRANCH = "main"` in the kernels; secrets do not
-   reach CLI runs, so results are copied from the kernel output by hand.
+In order, with exact settings: **`docs/HANDOVER.md`**. In short: full
+2,413-question run on Qwen3-VL-8B at 448 · Gemini reference run (editor) ·
+720 px cache to test whether more resolution fixes Position · hand-check 20
+answers · loop demo for the slide · deck.
 
 ### Decisions the team owes
 
@@ -164,6 +158,33 @@ Result files are in `results/e00_smoke_*` (local only, gitignored); manifest row
 kernel now caps every clip at `MAX_FRAMES = 25`, the `budget_frames` in
 `configs/default.yaml`, so long rallies are subsampled uniformly to the same
 budget as every other method (rule 4).
+
+## Resolution sweep: Qwen3-VL-8B at 224 / 336 / 448 (e05, kernel v10)
+
+Mon 12 Oct, snapshot `666507b`. Same 500 questions, same 25-frame cap; frames
+downscaled at load from the 448 cache (448 = e03). **0 errors.** 336: 22.9 min,
+224: 10.5 min.
+
+| Short side | Count | Action | Position | Cognition | Input tokens | Visual tokens | s/q |
+|---|---|---|---|---|---|---|---|
+| 224 | 37.9% | 29.4% | 14.3% | 49.2% | **872** | 649 | **1.26** |
+| 336 | 41.1% | 27.8% | **12.7%** | 48.4% | 1,692 | 1,468 | 2.75 |
+| **448** (e03) | 41.1% | 27.8% | **19.0%** | 50.0% | 2,928 | 2,705 | 4.17 |
+
+Paired against 448 (McNemar): only Position at 336 differs (p = 0.02); every
+other cell p ≥ 0.18. Always-A on Position is 18.3%.
+
+- **Count, Action and Cognition do not depend on resolution** between 224 and
+  448. 224 px costs **3.4× fewer input tokens** for the same answers there.
+- **Position is the only resolution-sensitive domain, and it gets worse as
+  frames shrink** (19.0 → 12.7 / 14.3%): hitting prediction 16.7 → 7.1 / 9.5,
+  moving recognition 26.2 → 19.0. Even 448 is only at chance.
+- **Decision for Review 2: keep 448** for the reported numbers. The open
+  question is whether **more** resolution lifts Position; that needs a 720 px
+  frame cache (next steps).
+- For the agentic loop (~3× the calls per question), 224 is the cheap option
+  for Count / Action / Cognition questions; resolution could be chosen per
+  question by the planner, which is itself an observation-budget decision.
 
 ## Chosen backbone: Qwen3-VL-8B, 500 questions (e03, kernel v9)
 

@@ -1,0 +1,5 @@
+domain,n,accuracy,frames,input_tokens,sec_per_q
+count,37,0.297,22.514,4268.351,5.696
+action,39,0.308,12.179,2434.179,6.763
+position,37,0.189,11.108,2204.486,2.771
+cognition,37,0.432,16.514,3355.405,4.295
