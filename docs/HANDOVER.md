@@ -20,6 +20,7 @@ Every number below has a row in `results/MANIFEST.md`.
 | e02: backbone screen, 150 q | Qwen3-VL-8B best; Qwen2.5-VL-3B invalid (fp16 overflow) | `STATUS.md` |
 | e03: **Qwen3-VL-8B, 500 q (chosen backbone)** | Count 41.1 · Action 27.8 · Position 19.0 · **Cognition 50.0**; 19% fewer tokens | `STATUS.md` |
 | e05: resolution sweep 224 / 336 / 448 | Flat except Position, which drops below chance at lower resolution. **Keep 448** | `STATUS.md` |
+| e06: **Qwen3-VL-8B, all 2,413 questions** | Count 40.7 · Action 24.5 · Position 20.2 (below its 23.8 floor) · Cognition 48.5, overall 33.7; **0 errors** | `STATUS.md`, `results/e06_full_*` |
 | Gemini backend + CPU kernel | Code done and tested; **not run yet** (step 2) | `kernels/fbbench-gemini/` |
 | Gates G1, G2, G3 | All met | `STATUS.md` |
 
@@ -66,7 +67,7 @@ with `kaggle kernels push -p kernels/<dir>`.
 
 ## Next steps, in order
 
-### 1. Full FBBench run: all 2,413 questions (about 3 h GPU, one session)
+### 1. Full FBBench run: all 2,413 questions (about 3 h GPU, one session) — **DONE (e06, Sat 18 Oct)**
 
 The number that can sit next to the paper's. The paper reports overall MCQ
 accuracy on all questions; we have only 500 so far.
@@ -156,7 +157,7 @@ Review 2 deliverables (`docs/ROADMAP.md`, bottom), with current status:
 |---|---|---|
 | 1 | Dataset report, zero contamination, label vocabulary | **Done** |
 | 2 | Backbone screening table | **Done** (+ Gemini row from step 2) |
-| 3 | Zero-shot accuracy on the chosen backbone, per domain | **Done** at 500; step 1 for all 2,413 |
+| 3 | Zero-shot accuracy on the chosen backbone, per domain | **Done**, full run e06 on all 2,413 (overall 33.7%) |
 | 4 | Resolution sweep, accuracy vs tokens | **Done** (+ 720 from step 3) |
 | 5 | Inference cost: seconds and tokens per query | **Done** |
 | 6 | Loop demonstration | Step 5 |
