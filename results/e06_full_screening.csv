@@ -1,0 +1,2 @@
+model,count,action,position,cognition,always_A,errors,frames,input_tokens,sec_per_q
+Qwen3-VL-8B-Instruct,0.407,0.245,0.202,0.485,0.262,0,14.0,2786,3.97

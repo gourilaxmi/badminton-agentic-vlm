@@ -8,14 +8,10 @@ venv/
 /data/
 !/data/.gitkeep
 
-# run outputs
-results/*
-!results/.gitkeep
-!results/MANIFEST.md
-!results/dataset_report.md
-
 *.sqlite
 *.ckpt
 *.safetensors
 .ipynb_checkpoints/
 .DS_Store
+
+.freebuff

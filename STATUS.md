@@ -159,6 +159,24 @@ kernel now caps every clip at `MAX_FRAMES = 25`, the `budget_frames` in
 `configs/default.yaml`, so long rallies are subsampled uniformly to the same
 budget as every other method (rule 4).
 
+## Full FBBench run: Qwen3-VL-8B, all 2,413 questions (e06)
+
+Fri 17 Oct 2026, 16:01–18:32 UTC, on `gourilakshmi05/fbbench-zero-shot` (own config copy, run in the editor), snapshot `3c641a3`, fp16 on T4 × 2, uniform 2 FPS, short side 448, cap 25 frames, **every question in the release**. **0 errors.** 147.2 min.
+
+| Domain | n | Accuracy | Always-A floor | Input tokens | s/q |
+|---|---|---|---|---|---|
+| Count | 413 | **40.7%** | 28.6% | 3,862 | 5.1 |
+| Action | 650 | 24.5% | 25.1% | 2,246 | 3.1 |
+| Position | 600 | 20.2% | 23.8% | 2,095 | 2.7 |
+| Cognition | 750 | **48.5%** | 27.9% | 3,213 | 4.2 |
+
+Overall 33.7% (812/2,413) against an always-A floor of 26.2%. Cost: 14.0 frames, 2,786 input tokens, 3.66 s per question. Predictions are spread (C 882 · B 669 · A 441 · D 421) against gold A 633 · C 617 · B 594 · D 569 — a mild C/B lean, no single-letter collapse.
+
+- **Consistent with e03** (same backbone and settings, first 500 questions in the same order): Count 40.7 vs 41.1, Action 24.5 vs 27.8, Position 20.2 vs 19.0, Cognition 48.5 vs 50.0 — every domain within ~3.3 pts, so the 500-question numbers were representative.
+- **Above its always-A floor on Count (+12.1 pts) and Cognition (+20.6). Below its floor on Action (24.5 vs 25.1) and Position (20.2 vs 23.8): always answering A would score higher than the model on Position.** Uniform 2 FPS at 448 px does not let a zero-shot 8B read stroke or court events — that is the deck's motivation for the query-conditioned observation of Review 3.
+- Against the FineBadminton paper's overall MCQ: below Gemini 2.5 Pro + their sampling (38.6%) and below their fine-tuned Qwen2.5-VL-7B pipeline (42.06%). Expected for a training-free zero-shot run — the gap is what Review 3's agentic loop targets without fine-tuning.
+- Per-sub-task table: `results/e06_full_Qwen3-VL-8B-Instruct_by_subtask.csv`. Weakest: hitting prediction 17.0% (6.0 frames' worth of information); strongest: point reason 59.6%.
+
 ## Resolution sweep: Qwen3-VL-8B at 224 / 336 / 448 (e05, kernel v10)
 
 Mon 12 Oct, snapshot `666507b`. Same 500 questions, same 25-frame cap; frames
