@@ -31,12 +31,18 @@ contains is in `results/dataset_report.md`.
 | Frame cache: 2 FPS, short side 448, all FBBench clips | Kaggle kernel `gourilakshmi05/finebadminton-frame-cache` (`kernels/frame-cache/`) | v2 test run: 20 clips, 0 errors |
 | Zero-shot GPU run: several models and resolutions in one session | Kaggle kernel `gourilakshmi05/fbbench-zero-shot` (`kernels/fbbench-zeroshot/`) | e01–e05, 0 errors since v7 |
 | Mock backends | `src/bavlm/models/backend.py` | `tests/test_mock_backend.py` |
+| **Loop demo: plan → evidence → reflection → round 2**, 10 clips, mock agent | `src/bavlm/agent/{observer,reflector,loop,mock}.py`, `scripts/05_loop_demo.py` | `tests/test_agent_loop.py` (10 tests); `results/loop_demo_slide.md` |
 
 `python -m pytest tests/ -q` → 50 passed (41 + 9 skipped on a fresh clone without `data/`).
 
 **Still stubs** (each raises `NotImplementedError` naming its phase):
-`data/loader.py`, `eval/metrics.py`, `sampling/hit_centric.py`, `agent/{observer,reflector,loop}.py`,
+`data/loader.py`, `eval/metrics.py`, `sampling/hit_centric.py`,
 `tools/{pose,tracker}.py`, `scripts/0{1,1b,2,3,4}_*.py` (the Kaggle notebook replaces 01 and 01b).
+
+**Implemented for the Review-2 demo (mock only, not yet evaluated):**
+`agent/observer.py`, `agent/reflector.py`, `agent/loop.py`, plus
+`agent/mock.py` (deterministic planner/observer/reflector replies so the loop
+runs on a laptop). See the loop-demo section below.
 
 ---
 

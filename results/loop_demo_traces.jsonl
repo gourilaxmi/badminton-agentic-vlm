@@ -1,0 +1,1170 @@
+{
+  "question_id": "action_classification/video_000001",
+  "clip_id": "video_000001",
+  "question": "Determine what type of shot the player (at the top) used for their last hit. Choose from the four options",
+  "domain": "action",
+  "rounds": [
+    {
+      "round": 1,
+      "plan": {
+        "what": "the stroke played, coarse, across the rally",
+        "spans": [
+          {
+            "start": 0.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 2.5,
+        "resolution": "low",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e1"
+      ],
+      "sufficient": false,
+      "confidence": 0.55,
+      "missing": "evidence covers only the opening; seek the later part of the rally at higher density"
+    },
+    {
+      "round": 2,
+      "plan": {
+        "what": "the racket-shuttle contact moment",
+        "spans": [
+          {
+            "start": 4.0,
+            "end": 7.0
+          }
+        ],
+        "fps": 8.33,
+        "resolution": "high",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "sufficient": true,
+      "confidence": 0.82,
+      "missing": ""
+    }
+  ],
+  "evidence": [
+    {
+      "span": {
+        "start": 0.0,
+        "end": 3.0
+      },
+      "description": "rally ends with the shuttle landing in court",
+      "court_region": "right mid court",
+      "hit_type": null,
+      "confidence": 0.93,
+      "source": "vlm",
+      "eid": "e1"
+    },
+    {
+      "span": {
+        "start": 0.55,
+        "end": 0.95
+      },
+      "description": "racket meets the shuttle, contact 1 visible",
+      "court_region": "mid front court",
+      "hit_type": "net shot",
+      "confidence": 0.63,
+      "source": "vlm",
+      "eid": "e2"
+    },
+    {
+      "span": {
+        "start": 1.3,
+        "end": 1.7
+      },
+      "description": "racket meets the shuttle, contact 2 visible",
+      "court_region": "mid court",
+      "hit_type": "lift",
+      "confidence": 0.73,
+      "source": "vlm",
+      "eid": "e3"
+    },
+    {
+      "span": {
+        "start": 2.05,
+        "end": 2.45
+      },
+      "description": "racket meets the shuttle, contact 3 visible",
+      "court_region": "mid back court",
+      "hit_type": "clear",
+      "confidence": 0.68,
+      "source": "vlm",
+      "eid": "e4"
+    }
+  ],
+  "cited": [
+    "e3",
+    "e4"
+  ],
+  "answer": "C",
+  "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
+  "frames_used": 0,
+  "input_tokens": 0,
+  "wall_seconds": 0.001
+}
+{
+  "question_id": "action_localization/video_000201",
+  "clip_id": "video_000201",
+  "question": "In the video segment, which hit number corresponds to Smash: A smash is a powerful overhead shot hit steeply downwards into the opponent's court., and is the hitter at the top or bottom of the screen?",
+  "domain": "action",
+  "rounds": [
+    {
+      "round": 1,
+      "plan": {
+        "what": "where the shuttle and players are",
+        "spans": [
+          {
+            "start": 0.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 2.5,
+        "resolution": "high",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e1"
+      ],
+      "sufficient": false,
+      "confidence": 0.55,
+      "missing": "evidence covers only the opening; seek the later part of the rally at higher density"
+    },
+    {
+      "round": 2,
+      "plan": {
+        "what": "the players' positions around contact",
+        "spans": [
+          {
+            "start": 3.0,
+            "end": 8.0
+          }
+        ],
+        "fps": 5.0,
+        "resolution": "high",
+        "crop": "player",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "sufficient": true,
+      "confidence": 0.82,
+      "missing": ""
+    }
+  ],
+  "evidence": [
+    {
+      "span": {
+        "start": 0.0,
+        "end": 3.0
+      },
+      "description": "both players visible; shuttle over the mid court",
+      "court_region": "mid court",
+      "hit_type": null,
+      "confidence": 0.75,
+      "source": "vlm",
+      "eid": "e1"
+    },
+    {
+      "span": {
+        "start": 0.55,
+        "end": 0.95
+      },
+      "description": "racket meets the shuttle, contact 1 visible",
+      "court_region": "right front court",
+      "hit_type": "clear",
+      "confidence": 0.63,
+      "source": "vlm",
+      "eid": "e2"
+    },
+    {
+      "span": {
+        "start": 1.3,
+        "end": 1.7
+      },
+      "description": "racket meets the shuttle, contact 2 visible",
+      "court_region": "mid front court",
+      "hit_type": "net shot",
+      "confidence": 0.89,
+      "source": "vlm",
+      "eid": "e3"
+    },
+    {
+      "span": {
+        "start": 2.05,
+        "end": 2.45
+      },
+      "description": "racket meets the shuttle, contact 3 visible",
+      "court_region": "right front court",
+      "hit_type": "clear",
+      "confidence": 0.82,
+      "source": "vlm",
+      "eid": "e4"
+    }
+  ],
+  "cited": [
+    "e3",
+    "e4"
+  ],
+  "answer": "C",
+  "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
+  "frames_used": 0,
+  "input_tokens": 0,
+  "wall_seconds": 0.0
+}
+{
+  "question_id": "action_prediction/video_000401",
+  "clip_id": "video_000401",
+  "question": "In the video clip, after the player at the bottom of the screen hits last, what is the most likely response from the opponent at the top? Choose the best option from the four explanations",
+  "domain": "action",
+  "rounds": [
+    {
+      "round": 1,
+      "plan": {
+        "what": "the stroke played, coarse, across the rally",
+        "spans": [
+          {
+            "start": 0.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 2.5,
+        "resolution": "low",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e1"
+      ],
+      "sufficient": false,
+      "confidence": 0.55,
+      "missing": "evidence covers only the opening; seek the later part of the rally at higher density"
+    },
+    {
+      "round": 2,
+      "plan": {
+        "what": "the racket-shuttle contact moment",
+        "spans": [
+          {
+            "start": 4.0,
+            "end": 7.0
+          }
+        ],
+        "fps": 8.33,
+        "resolution": "high",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "sufficient": true,
+      "confidence": 0.82,
+      "missing": ""
+    }
+  ],
+  "evidence": [
+    {
+      "span": {
+        "start": 0.0,
+        "end": 3.0
+      },
+      "description": "rally ends with the shuttle landing in court",
+      "court_region": "mid front court",
+      "hit_type": null,
+      "confidence": 0.8,
+      "source": "vlm",
+      "eid": "e1"
+    },
+    {
+      "span": {
+        "start": 0.55,
+        "end": 0.95
+      },
+      "description": "racket meets the shuttle, contact 1 visible",
+      "court_region": "mid front court",
+      "hit_type": "net shot",
+      "confidence": 0.94,
+      "source": "vlm",
+      "eid": "e2"
+    },
+    {
+      "span": {
+        "start": 1.3,
+        "end": 1.7
+      },
+      "description": "racket meets the shuttle, contact 2 visible",
+      "court_region": "mid back court",
+      "hit_type": "clear",
+      "confidence": 0.9,
+      "source": "vlm",
+      "eid": "e3"
+    },
+    {
+      "span": {
+        "start": 2.05,
+        "end": 2.45
+      },
+      "description": "racket meets the shuttle, contact 3 visible",
+      "court_region": "left back court",
+      "hit_type": "smash",
+      "confidence": 0.65,
+      "source": "vlm",
+      "eid": "e4"
+    }
+  ],
+  "cited": [
+    "e3",
+    "e4"
+  ],
+  "answer": "A",
+  "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
+  "frames_used": 0,
+  "input_tokens": 0,
+  "wall_seconds": 0.0
+}
+{
+  "question_id": "hitcount/video_000651",
+  "clip_id": "video_000651",
+  "question": "Calculate the total number of strokes hit by the bottom player in this rally.",
+  "domain": "count",
+  "rounds": [
+    {
+      "round": 1,
+      "plan": {
+        "what": "every racket contact in the rally, for counting",
+        "spans": [
+          {
+            "start": 0.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 2.5,
+        "resolution": "low",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e1",
+        "e2",
+        "e3"
+      ],
+      "sufficient": false,
+      "confidence": 0.55,
+      "missing": "evidence covers only the opening; seek the later part of the rally at higher density"
+    },
+    {
+      "round": 2,
+      "plan": {
+        "what": "a recount of the contacts after the midpoint",
+        "spans": [
+          {
+            "start": 5.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 5.0,
+        "resolution": "low",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e4",
+        "e5",
+        "e6"
+      ],
+      "sufficient": true,
+      "confidence": 0.82,
+      "missing": ""
+    }
+  ],
+  "evidence": [
+    {
+      "span": {
+        "start": 0.55,
+        "end": 0.95
+      },
+      "description": "racket meets the shuttle, contact 1 visible",
+      "court_region": "left mid court",
+      "hit_type": "clear",
+      "confidence": 0.8,
+      "source": "vlm",
+      "eid": "e1"
+    },
+    {
+      "span": {
+        "start": 1.3,
+        "end": 1.7
+      },
+      "description": "racket meets the shuttle, contact 2 visible",
+      "court_region": "left front court",
+      "hit_type": "drive",
+      "confidence": 0.64,
+      "source": "vlm",
+      "eid": "e2"
+    },
+    {
+      "span": {
+        "start": 2.05,
+        "end": 2.45
+      },
+      "description": "racket meets the shuttle, contact 3 visible",
+      "court_region": "right front court",
+      "hit_type": "lift",
+      "confidence": 0.73,
+      "source": "vlm",
+      "eid": "e3"
+    },
+    {
+      "span": {
+        "start": 0.55,
+        "end": 0.95
+      },
+      "description": "racket meets the shuttle, contact 1 visible",
+      "court_region": "mid court",
+      "hit_type": "lift",
+      "confidence": 0.8,
+      "source": "vlm",
+      "eid": "e4"
+    },
+    {
+      "span": {
+        "start": 1.3,
+        "end": 1.7
+      },
+      "description": "racket meets the shuttle, contact 2 visible",
+      "court_region": "right front court",
+      "hit_type": "lift",
+      "confidence": 0.77,
+      "source": "vlm",
+      "eid": "e5"
+    },
+    {
+      "span": {
+        "start": 2.05,
+        "end": 2.45
+      },
+      "description": "racket meets the shuttle, contact 3 visible",
+      "court_region": "left back court",
+      "hit_type": "lift",
+      "confidence": 0.87,
+      "source": "vlm",
+      "eid": "e6"
+    }
+  ],
+  "cited": [
+    "e5",
+    "e6"
+  ],
+  "answer": "B",
+  "explanation": "The answer follows from e5, e6: the round-2 observations cover the window the first round missed.",
+  "frames_used": 0,
+  "input_tokens": 0,
+  "wall_seconds": 0.0
+}
+{
+  "question_id": "hitting_comment2_updated/video_000851",
+  "clip_id": "video_000851",
+  "question": "For the last shot of the bottom player in this rally, which of the following evaluations best matches the actual performance?",
+  "domain": "cognition",
+  "rounds": [
+    {
+      "round": 1,
+      "plan": {
+        "what": "the stroke played, coarse, across the rally",
+        "spans": [
+          {
+            "start": 0.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 2.5,
+        "resolution": "low",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e1"
+      ],
+      "sufficient": false,
+      "confidence": 0.55,
+      "missing": "evidence covers only the opening; seek the later part of the rally at higher density"
+    },
+    {
+      "round": 2,
+      "plan": {
+        "what": "the racket-shuttle contact moment",
+        "spans": [
+          {
+            "start": 4.0,
+            "end": 7.0
+          }
+        ],
+        "fps": 8.33,
+        "resolution": "high",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "sufficient": true,
+      "confidence": 0.82,
+      "missing": ""
+    }
+  ],
+  "evidence": [
+    {
+      "span": {
+        "start": 0.0,
+        "end": 3.0
+      },
+      "description": "rally ends with the shuttle landing in court",
+      "court_region": "right back court",
+      "hit_type": null,
+      "confidence": 0.8,
+      "source": "vlm",
+      "eid": "e1"
+    },
+    {
+      "span": {
+        "start": 0.55,
+        "end": 0.95
+      },
+      "description": "racket meets the shuttle, contact 1 visible",
+      "court_region": "right mid court",
+      "hit_type": "net shot",
+      "confidence": 0.7,
+      "source": "vlm",
+      "eid": "e2"
+    },
+    {
+      "span": {
+        "start": 1.3,
+        "end": 1.7
+      },
+      "description": "racket meets the shuttle, contact 2 visible",
+      "court_region": "right front court",
+      "hit_type": "drop",
+      "confidence": 0.63,
+      "source": "vlm",
+      "eid": "e3"
+    },
+    {
+      "span": {
+        "start": 2.05,
+        "end": 2.45
+      },
+      "description": "racket meets the shuttle, contact 3 visible",
+      "court_region": "mid back court",
+      "hit_type": "smash",
+      "confidence": 0.77,
+      "source": "vlm",
+      "eid": "e4"
+    }
+  ],
+  "cited": [
+    "e3",
+    "e4"
+  ],
+  "answer": "B",
+  "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
+  "frames_used": 0,
+  "input_tokens": 0,
+  "wall_seconds": 0.0
+}
+{
+  "question_id": "hitting_localization_new/video_001101",
+  "clip_id": "video_001101",
+  "question": "Determine the area of their court (with their facing direction as front) where the player (at the bottom) executed their last hit. Choose the closest option based on the explanations",
+  "domain": "position",
+  "rounds": [
+    {
+      "round": 1,
+      "plan": {
+        "what": "where the shuttle and players are",
+        "spans": [
+          {
+            "start": 0.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 2.5,
+        "resolution": "high",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e1"
+      ],
+      "sufficient": false,
+      "confidence": 0.55,
+      "missing": "evidence covers only the opening; seek the later part of the rally at higher density"
+    },
+    {
+      "round": 2,
+      "plan": {
+        "what": "the players' positions around contact",
+        "spans": [
+          {
+            "start": 3.0,
+            "end": 8.0
+          }
+        ],
+        "fps": 5.0,
+        "resolution": "high",
+        "crop": "player",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "sufficient": true,
+      "confidence": 0.82,
+      "missing": ""
+    }
+  ],
+  "evidence": [
+    {
+      "span": {
+        "start": 0.0,
+        "end": 3.0
+      },
+      "description": "both players visible; shuttle over the mid court",
+      "court_region": "right mid court",
+      "hit_type": null,
+      "confidence": 0.86,
+      "source": "vlm",
+      "eid": "e1"
+    },
+    {
+      "span": {
+        "start": 0.55,
+        "end": 0.95
+      },
+      "description": "racket meets the shuttle, contact 1 visible",
+      "court_region": "mid court",
+      "hit_type": "smash",
+      "confidence": 0.64,
+      "source": "vlm",
+      "eid": "e2"
+    },
+    {
+      "span": {
+        "start": 1.3,
+        "end": 1.7
+      },
+      "description": "racket meets the shuttle, contact 2 visible",
+      "court_region": "left front court",
+      "hit_type": "net shot",
+      "confidence": 0.86,
+      "source": "vlm",
+      "eid": "e3"
+    },
+    {
+      "span": {
+        "start": 2.05,
+        "end": 2.45
+      },
+      "description": "racket meets the shuttle, contact 3 visible",
+      "court_region": "right back court",
+      "hit_type": "drop",
+      "confidence": 0.75,
+      "source": "vlm",
+      "eid": "e4"
+    }
+  ],
+  "cited": [
+    "e3",
+    "e4"
+  ],
+  "answer": "D",
+  "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
+  "frames_used": 0,
+  "input_tokens": 0,
+  "wall_seconds": 0.0
+}
+{
+  "question_id": "hitting_prediction/video_001301",
+  "clip_id": "video_001301",
+  "question": "Which area on the opponent's court (with the opponent's facing direction as front) is most likely to be hit by the ball after the player (at the top) hits last?",
+  "domain": "position",
+  "rounds": [
+    {
+      "round": 1,
+      "plan": {
+        "what": "where the shuttle and players are",
+        "spans": [
+          {
+            "start": 0.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 2.5,
+        "resolution": "high",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e1"
+      ],
+      "sufficient": false,
+      "confidence": 0.55,
+      "missing": "evidence covers only the opening; seek the later part of the rally at higher density"
+    },
+    {
+      "round": 2,
+      "plan": {
+        "what": "the players' positions around contact",
+        "spans": [
+          {
+            "start": 3.0,
+            "end": 8.0
+          }
+        ],
+        "fps": 5.0,
+        "resolution": "high",
+        "crop": "player",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "sufficient": true,
+      "confidence": 0.82,
+      "missing": ""
+    }
+  ],
+  "evidence": [
+    {
+      "span": {
+        "start": 0.0,
+        "end": 3.0
+      },
+      "description": "both players visible; shuttle over the mid court",
+      "court_region": "mid court",
+      "hit_type": null,
+      "confidence": 0.87,
+      "source": "vlm",
+      "eid": "e1"
+    },
+    {
+      "span": {
+        "start": 0.55,
+        "end": 0.95
+      },
+      "description": "racket meets the shuttle, contact 1 visible",
+      "court_region": "right mid court",
+      "hit_type": "lift",
+      "confidence": 0.72,
+      "source": "vlm",
+      "eid": "e2"
+    },
+    {
+      "span": {
+        "start": 1.3,
+        "end": 1.7
+      },
+      "description": "racket meets the shuttle, contact 2 visible",
+      "court_region": "right back court",
+      "hit_type": "smash",
+      "confidence": 0.8,
+      "source": "vlm",
+      "eid": "e3"
+    },
+    {
+      "span": {
+        "start": 2.05,
+        "end": 2.45
+      },
+      "description": "racket meets the shuttle, contact 3 visible",
+      "court_region": "mid court",
+      "hit_type": "net shot",
+      "confidence": 0.89,
+      "source": "vlm",
+      "eid": "e4"
+    }
+  ],
+  "cited": [
+    "e3",
+    "e4"
+  ],
+  "answer": "D",
+  "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
+  "frames_used": 0,
+  "input_tokens": 0,
+  "wall_seconds": 0.0
+}
+{
+  "question_id": "moving_recognization/video_001501",
+  "clip_id": "video_001501",
+  "question": "What option describes the movement direction of the player (at the bottom) relative to their facing direction during the hit?",
+  "domain": "position",
+  "rounds": [
+    {
+      "round": 1,
+      "plan": {
+        "what": "the stroke played, coarse, across the rally",
+        "spans": [
+          {
+            "start": 0.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 2.5,
+        "resolution": "low",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e1"
+      ],
+      "sufficient": false,
+      "confidence": 0.55,
+      "missing": "evidence covers only the opening; seek the later part of the rally at higher density"
+    },
+    {
+      "round": 2,
+      "plan": {
+        "what": "the racket-shuttle contact moment",
+        "spans": [
+          {
+            "start": 4.0,
+            "end": 7.0
+          }
+        ],
+        "fps": 8.33,
+        "resolution": "high",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "sufficient": true,
+      "confidence": 0.82,
+      "missing": ""
+    }
+  ],
+  "evidence": [
+    {
+      "span": {
+        "start": 0.0,
+        "end": 3.0
+      },
+      "description": "rally ends with the shuttle landing in court",
+      "court_region": "left mid court",
+      "hit_type": null,
+      "confidence": 0.77,
+      "source": "vlm",
+      "eid": "e1"
+    },
+    {
+      "span": {
+        "start": 0.55,
+        "end": 0.95
+      },
+      "description": "racket meets the shuttle, contact 1 visible",
+      "court_region": "mid court",
+      "hit_type": "drive",
+      "confidence": 0.62,
+      "source": "vlm",
+      "eid": "e2"
+    },
+    {
+      "span": {
+        "start": 1.3,
+        "end": 1.7
+      },
+      "description": "racket meets the shuttle, contact 2 visible",
+      "court_region": "left mid court",
+      "hit_type": "drive",
+      "confidence": 0.83,
+      "source": "vlm",
+      "eid": "e3"
+    },
+    {
+      "span": {
+        "start": 2.05,
+        "end": 2.45
+      },
+      "description": "racket meets the shuttle, contact 3 visible",
+      "court_region": "right back court",
+      "hit_type": "drive",
+      "confidence": 0.7,
+      "source": "vlm",
+      "eid": "e4"
+    }
+  ],
+  "cited": [
+    "e3",
+    "e4"
+  ],
+  "answer": "D",
+  "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
+  "frames_used": 0,
+  "input_tokens": 0,
+  "wall_seconds": 0.0
+}
+{
+  "question_id": "pointer_recog_updated/video_001701",
+  "clip_id": "video_001701",
+  "question": "Please analyze the main reason why the scoring side scored in this rally.",
+  "domain": "cognition",
+  "rounds": [
+    {
+      "round": 1,
+      "plan": {
+        "what": "the rally outcome, coarse, across the whole rally",
+        "spans": [
+          {
+            "start": 0.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 2.5,
+        "resolution": "low",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e1"
+      ],
+      "sufficient": false,
+      "confidence": 0.55,
+      "missing": "evidence covers only the opening; seek the later part of the rally at higher density"
+    },
+    {
+      "round": 2,
+      "plan": {
+        "what": "the decisive shot at full detail",
+        "spans": [
+          {
+            "start": 6.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 6.25,
+        "resolution": "high",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e2"
+      ],
+      "sufficient": true,
+      "confidence": 0.82,
+      "missing": ""
+    }
+  ],
+  "evidence": [
+    {
+      "span": {
+        "start": 0.0,
+        "end": 3.0
+      },
+      "description": "rally ends with the shuttle landing in court",
+      "court_region": "left back court",
+      "hit_type": null,
+      "confidence": 0.91,
+      "source": "vlm",
+      "eid": "e1"
+    },
+    {
+      "span": {
+        "start": 2.4,
+        "end": 3.0
+      },
+      "description": "striker plays an attacking shot into the open court",
+      "court_region": "mid front court",
+      "hit_type": "smash",
+      "confidence": 0.93,
+      "source": "vlm",
+      "eid": "e2"
+    }
+  ],
+  "cited": [
+    "e1",
+    "e2"
+  ],
+  "answer": "A",
+  "explanation": "The answer follows from e1, e2: the round-2 observations cover the window the first round missed.",
+  "frames_used": 0,
+  "input_tokens": 0,
+  "wall_seconds": 0.0
+}
+{
+  "question_id": "round_comment_updated/video_001951",
+  "clip_id": "video_001951",
+  "question": "Which of the following best comprehensively evaluates the performance of this rally?",
+  "domain": "cognition",
+  "rounds": [
+    {
+      "round": 1,
+      "plan": {
+        "what": "the stroke played, coarse, across the rally",
+        "spans": [
+          {
+            "start": 0.0,
+            "end": 10.0
+          }
+        ],
+        "fps": 2.5,
+        "resolution": "low",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e1"
+      ],
+      "sufficient": false,
+      "confidence": 0.55,
+      "missing": "evidence covers only the opening; seek the later part of the rally at higher density"
+    },
+    {
+      "round": 2,
+      "plan": {
+        "what": "the racket-shuttle contact moment",
+        "spans": [
+          {
+            "start": 4.0,
+            "end": 7.0
+          }
+        ],
+        "fps": 8.33,
+        "resolution": "high",
+        "crop": "full",
+        "use_pose": false,
+        "budget": 25
+      },
+      "frames_this_round": 0,
+      "evidence_ids": [
+        "e2",
+        "e3",
+        "e4"
+      ],
+      "sufficient": true,
+      "confidence": 0.82,
+      "missing": ""
+    }
+  ],
+  "evidence": [
+    {
+      "span": {
+        "start": 0.0,
+        "end": 3.0
+      },
+      "description": "rally ends with the shuttle landing in court",
+      "court_region": "right mid court",
+      "hit_type": null,
+      "confidence": 0.66,
+      "source": "vlm",
+      "eid": "e1"
+    },
+    {
+      "span": {
+        "start": 0.55,
+        "end": 0.95
+      },
+      "description": "racket meets the shuttle, contact 1 visible",
+      "court_region": "right back court",
+      "hit_type": "clear",
+      "confidence": 0.62,
+      "source": "vlm",
+      "eid": "e2"
+    },
+    {
+      "span": {
+        "start": 1.3,
+        "end": 1.7
+      },
+      "description": "racket meets the shuttle, contact 2 visible",
+      "court_region": "left front court",
+      "hit_type": "smash",
+      "confidence": 0.86,
+      "source": "vlm",
+      "eid": "e3"
+    },
+    {
+      "span": {
+        "start": 2.05,
+        "end": 2.45
+      },
+      "description": "racket meets the shuttle, contact 3 visible",
+      "court_region": "left back court",
+      "hit_type": "net shot",
+      "confidence": 0.92,
+      "source": "vlm",
+      "eid": "e4"
+    }
+  ],
+  "cited": [
+    "e3",
+    "e4"
+  ],
+  "answer": "B",
+  "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
+  "frames_used": 0,
+  "input_tokens": 0,
+  "wall_seconds": 0.0
+}
