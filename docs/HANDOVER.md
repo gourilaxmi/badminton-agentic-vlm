@@ -132,12 +132,20 @@ domains, open the clip, check gold and prediction by eye. Start with
 **detailed hitting count**, which fell 22 points from Qwen2.5 to Qwen3 while
 round count rose 20. Note anything wrong with the question or key.
 
-### 5. Loop demo for the slide (D3, 2–3.5 h, laptop, mock mode)
+### 5. Loop demo for the slide (D3, 2–3.5 h, laptop, mock mode) — **DONE (Sat 18 Oct)**
 
-One worked trace: plan → evidence (cited frames) → reflection → second round,
-on a few clips. **Qualitative only, claim no accuracy.** Prompts are in
-`src/bavlm/agent/prompts/`; `agent/{observer,reflector,loop}.py` are still
-stubs. Do not build the full loop before Review 3.
+**DONE (Sat 18 Oct):** `python scripts/05_loop_demo.py` runs 10 questions
+(round-robin over the 12 sub-tasks) through plan → evidence → reflection →
+round 2 against the deterministic mock. Output: `results/loop_demo_traces.jsonl`
+(all 10 traces) and `results/loop_demo_slide.md` (one cognition trace formatted
+for the slide). The real loop code is in `agent/{observer,reflector,loop}.py`;
+the mock in `agent/mock.py` stands in for judgement only, so nothing here
+supports an accuracy claim. Tests: `tests/test_agent_loop.py` (budget clamp,
+span/frame selection, round cap, eid/citation integrity).
+
+Original note: one worked trace, **qualitative only, claim no accuracy.** Do
+not build the full loop evaluation before Review 3 (`scripts/03_run_agent.py`
+remains a phase-3 stub).
 
 ### 6. Small fixes
 
@@ -160,7 +168,7 @@ Review 2 deliverables (`docs/ROADMAP.md`, bottom), with current status:
 | 3 | Zero-shot accuracy on the chosen backbone, per domain | **Done**, full run e06 on all 2,413 (overall 33.7%) |
 | 4 | Resolution sweep, accuracy vs tokens | **Done** (+ 720 from step 3) |
 | 5 | Inference cost: seconds and tokens per query | **Done** |
-| 6 | Loop demonstration | Step 5 |
+| 6 | Loop demonstration | **Done** (mock, 10 clips; `results/loop_demo_slide.md`) |
 | 7 | Repo green, manifest complete, fresh-clone reproducible | **Done** (fresh clone: 41 pass, 9 skip without data) |
 | 8 | Two slides of honest risk | To write |
 

@@ -41,14 +41,19 @@ Moujuruo/Finebadminton-20K        training corpus — develop here
 Moujuruo/FineBadmintonBenchmark   FBBench — final numbers only
 ```
 
-FineBadminton: 120 matches → **3,215 rally clips** (pre-segmented), 33,325
-strokes, average rally **12.4 s**, consistent **25 FPS**, 720p+, overhead-behind
-camera. Three annotation levels: Foundational Actions (11 hit types, 20
-subtypes, 9 court regions) · Tactical Semantics · Decision Evaluation (quality
-1–7 plus free-text reasons).
+FineBadminton: the paper describes 120 matches → **3,215 rally clips**, 33,325
+strokes; the HF **release** (`Finebadminton-20K`, 70 matches) carries **2,066
+rallies / 20,757 hits**, mean rally **10.4 s**, frame rate **not constant**
+(~30 fps × 1,370 rallies, ~25 fps × 696 — convert indices with each rally's own
+`fps`). 720p+, overhead-behind camera. Three annotation levels: Foundational
+Actions (11 hit types, 20 subtypes, 9 court regions) · Tactical Semantics ·
+Decision Evaluation (quality 1–7 plus free-text reasons).
 
-FBBench: **2,563 QA pairs** — 2,413 multiple-choice, 150 open-ended. Four
-domains × three subcategories: **Count, Action, Position, Cognition**.
+FBBench: the current HF release (@`ff86093a`) has **2,413 multiple-choice QA
+pairs only** — the paper's 150 open-ended questions are missing, so rule 12
+cannot run yet. It **ships one clip per question** (`video_uid`), so eval needs
+no 20K download. Four domains × three subcategories: **Count, Action, Position,
+Cognition**.
 
 Reference numbers to beat, from the FineBadminton paper (ACM MM 2025):
 
