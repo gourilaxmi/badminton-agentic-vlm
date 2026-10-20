@@ -11,16 +11,16 @@
         "spans": [
           {
             "start": 0.0,
-            "end": 10.0
+            "end": 5.0
           }
         ],
-        "fps": 2.5,
+        "fps": 5.0,
         "resolution": "low",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 10,
       "evidence_ids": [
         "e1"
       ],
@@ -34,17 +34,17 @@
         "what": "the racket-shuttle contact moment",
         "spans": [
           {
-            "start": 4.0,
-            "end": 7.0
+            "start": 2.0,
+            "end": 3.5
           }
         ],
-        "fps": 8.33,
+        "fps": 16.67,
         "resolution": "high",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 3,
       "evidence_ids": [
         "e2",
         "e3",
@@ -111,9 +111,9 @@
   ],
   "answer": "C",
   "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
-  "frames_used": 0,
+  "frames_used": 13,
   "input_tokens": 0,
-  "wall_seconds": 0.001
+  "wall_seconds": 0.002
 }
 {
   "question_id": "action_localization/video_000201",
@@ -128,16 +128,16 @@
         "spans": [
           {
             "start": 0.0,
-            "end": 10.0
+            "end": 9.5
           }
         ],
-        "fps": 2.5,
+        "fps": 2.63,
         "resolution": "high",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 19,
       "evidence_ids": [
         "e1"
       ],
@@ -151,17 +151,17 @@
         "what": "the players' positions around contact",
         "spans": [
           {
-            "start": 3.0,
-            "end": 8.0
+            "start": 2.85,
+            "end": 7.6
           }
         ],
-        "fps": 5.0,
+        "fps": 5.26,
         "resolution": "high",
         "crop": "player",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 10,
       "evidence_ids": [
         "e2",
         "e3",
@@ -228,9 +228,9 @@
   ],
   "answer": "C",
   "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
-  "frames_used": 0,
+  "frames_used": 29,
   "input_tokens": 0,
-  "wall_seconds": 0.0
+  "wall_seconds": 0.001
 }
 {
   "question_id": "action_prediction/video_000401",
@@ -245,16 +245,16 @@
         "spans": [
           {
             "start": 0.0,
-            "end": 10.0
+            "end": 6.0
           }
         ],
-        "fps": 2.5,
+        "fps": 4.17,
         "resolution": "low",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 12,
       "evidence_ids": [
         "e1"
       ],
@@ -268,17 +268,17 @@
         "what": "the racket-shuttle contact moment",
         "spans": [
           {
-            "start": 4.0,
-            "end": 7.0
+            "start": 2.4,
+            "end": 4.2
           }
         ],
-        "fps": 8.33,
+        "fps": 13.89,
         "resolution": "high",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 4,
       "evidence_ids": [
         "e2",
         "e3",
@@ -345,9 +345,9 @@
   ],
   "answer": "A",
   "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
-  "frames_used": 0,
+  "frames_used": 16,
   "input_tokens": 0,
-  "wall_seconds": 0.0
+  "wall_seconds": 0.001
 }
 {
   "question_id": "hitcount/video_000651",
@@ -362,16 +362,16 @@
         "spans": [
           {
             "start": 0.0,
-            "end": 10.0
+            "end": 3.0
           }
         ],
-        "fps": 2.5,
+        "fps": 8.33,
         "resolution": "low",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 6,
       "evidence_ids": [
         "e1",
         "e2",
@@ -387,17 +387,17 @@
         "what": "a recount of the contacts after the midpoint",
         "spans": [
           {
-            "start": 5.0,
-            "end": 10.0
+            "start": 1.5,
+            "end": 3.0
           }
         ],
-        "fps": 5.0,
+        "fps": 16.67,
         "resolution": "low",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 3,
       "evidence_ids": [
         "e4",
         "e5",
@@ -488,9 +488,9 @@
   ],
   "answer": "B",
   "explanation": "The answer follows from e5, e6: the round-2 observations cover the window the first round missed.",
-  "frames_used": 0,
+  "frames_used": 9,
   "input_tokens": 0,
-  "wall_seconds": 0.0
+  "wall_seconds": 0.001
 }
 {
   "question_id": "hitting_comment2_updated/video_000851",
@@ -505,16 +505,16 @@
         "spans": [
           {
             "start": 0.0,
-            "end": 10.0
+            "end": 3.0
           }
         ],
-        "fps": 2.5,
+        "fps": 8.33,
         "resolution": "low",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 6,
       "evidence_ids": [
         "e1"
       ],
@@ -528,17 +528,17 @@
         "what": "the racket-shuttle contact moment",
         "spans": [
           {
-            "start": 4.0,
-            "end": 7.0
+            "start": 1.2,
+            "end": 2.1
           }
         ],
-        "fps": 8.33,
+        "fps": 25.0,
         "resolution": "high",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 2,
       "evidence_ids": [
         "e2",
         "e3",
@@ -605,7 +605,7 @@
   ],
   "answer": "B",
   "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
-  "frames_used": 0,
+  "frames_used": 8,
   "input_tokens": 0,
   "wall_seconds": 0.0
 }
@@ -622,16 +622,16 @@
         "spans": [
           {
             "start": 0.0,
-            "end": 10.0
+            "end": 4.5
           }
         ],
-        "fps": 2.5,
+        "fps": 5.56,
         "resolution": "high",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 9,
       "evidence_ids": [
         "e1"
       ],
@@ -645,17 +645,17 @@
         "what": "the players' positions around contact",
         "spans": [
           {
-            "start": 3.0,
-            "end": 8.0
+            "start": 1.35,
+            "end": 3.6
           }
         ],
-        "fps": 5.0,
+        "fps": 11.11,
         "resolution": "high",
         "crop": "player",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 5,
       "evidence_ids": [
         "e2",
         "e3",
@@ -722,7 +722,7 @@
   ],
   "answer": "D",
   "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
-  "frames_used": 0,
+  "frames_used": 14,
   "input_tokens": 0,
   "wall_seconds": 0.0
 }
@@ -739,16 +739,16 @@
         "spans": [
           {
             "start": 0.0,
-            "end": 10.0
+            "end": 4.5
           }
         ],
-        "fps": 2.5,
+        "fps": 5.56,
         "resolution": "high",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 9,
       "evidence_ids": [
         "e1"
       ],
@@ -762,17 +762,17 @@
         "what": "the players' positions around contact",
         "spans": [
           {
-            "start": 3.0,
-            "end": 8.0
+            "start": 1.35,
+            "end": 3.6
           }
         ],
-        "fps": 5.0,
+        "fps": 11.11,
         "resolution": "high",
         "crop": "player",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 5,
       "evidence_ids": [
         "e2",
         "e3",
@@ -839,9 +839,9 @@
   ],
   "answer": "D",
   "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
-  "frames_used": 0,
+  "frames_used": 14,
   "input_tokens": 0,
-  "wall_seconds": 0.0
+  "wall_seconds": 0.001
 }
 {
   "question_id": "moving_recognization/video_001501",
@@ -856,16 +856,16 @@
         "spans": [
           {
             "start": 0.0,
-            "end": 10.0
+            "end": 5.0
           }
         ],
-        "fps": 2.5,
+        "fps": 5.0,
         "resolution": "low",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 10,
       "evidence_ids": [
         "e1"
       ],
@@ -879,17 +879,17 @@
         "what": "the racket-shuttle contact moment",
         "spans": [
           {
-            "start": 4.0,
-            "end": 7.0
+            "start": 2.0,
+            "end": 3.5
           }
         ],
-        "fps": 8.33,
+        "fps": 16.67,
         "resolution": "high",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 3,
       "evidence_ids": [
         "e2",
         "e3",
@@ -956,7 +956,7 @@
   ],
   "answer": "D",
   "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
-  "frames_used": 0,
+  "frames_used": 13,
   "input_tokens": 0,
   "wall_seconds": 0.0
 }
@@ -973,16 +973,16 @@
         "spans": [
           {
             "start": 0.0,
-            "end": 10.0
+            "end": 9.0
           }
         ],
-        "fps": 2.5,
+        "fps": 2.78,
         "resolution": "low",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 18,
       "evidence_ids": [
         "e1"
       ],
@@ -996,17 +996,17 @@
         "what": "the decisive shot at full detail",
         "spans": [
           {
-            "start": 6.0,
-            "end": 10.0
+            "start": 5.4,
+            "end": 9.0
           }
         ],
-        "fps": 6.25,
+        "fps": 6.94,
         "resolution": "high",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 7,
       "evidence_ids": [
         "e2"
       ],
@@ -1047,9 +1047,9 @@
   ],
   "answer": "A",
   "explanation": "The answer follows from e1, e2: the round-2 observations cover the window the first round missed.",
-  "frames_used": 0,
+  "frames_used": 25,
   "input_tokens": 0,
-  "wall_seconds": 0.0
+  "wall_seconds": 0.001
 }
 {
   "question_id": "round_comment_updated/video_001951",
@@ -1064,16 +1064,16 @@
         "spans": [
           {
             "start": 0.0,
-            "end": 10.0
+            "end": 6.0
           }
         ],
-        "fps": 2.5,
+        "fps": 4.17,
         "resolution": "low",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 12,
       "evidence_ids": [
         "e1"
       ],
@@ -1087,17 +1087,17 @@
         "what": "the racket-shuttle contact moment",
         "spans": [
           {
-            "start": 4.0,
-            "end": 7.0
+            "start": 2.4,
+            "end": 4.2
           }
         ],
-        "fps": 8.33,
+        "fps": 13.89,
         "resolution": "high",
         "crop": "full",
         "use_pose": false,
         "budget": 25
       },
-      "frames_this_round": 0,
+      "frames_this_round": 4,
       "evidence_ids": [
         "e2",
         "e3",
@@ -1164,7 +1164,7 @@
   ],
   "answer": "B",
   "explanation": "The answer follows from e3, e4: the round-2 observations cover the window the first round missed.",
-  "frames_used": 0,
+  "frames_used": 16,
   "input_tokens": 0,
-  "wall_seconds": 0.0
+  "wall_seconds": 0.001
 }

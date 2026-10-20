@@ -15,6 +15,7 @@ One row per reported run. A number without a row here does not go in the report.
 | 2026-10-12 18:12 UTC | e05_resolution | Qwen/Qwen3-VL-8B-Instruct | uniform 2 FPS, short side 224, cap 25 | 14.8 avg | FBBench n=500 | 666507b | e05_resolution_Qwen3-VL-8B-Instruct@224.jsonl (v10) |
 | 2026-10-18 09:13 UTC | e06_full | Qwen/Qwen3-VL-8B-Instruct | uniform 2 FPS, short side 448, cap 25 | 14.0 avg | FBBench n=2413 | 3c641a3 | e06_full_Qwen3-VL-8B-Instruct.jsonl |
 | 2026-10-18 10:19 UTC | e07_loop_demo (**qualitative, no accuracy claimed**) | mock:agent | agentic loop, budget 25/round, max 3 rounds | 0 (no cache) | FBBench n=10 | see git log | loop_demo_traces.jsonl |
+| 2026-10-20 15:33 UTC | e07_loop_demo rerun on real frames (**qualitative, mock agent, no accuracy claimed**) | mock:agent | agentic loop, budget 25/round, max 3 rounds, 2 FPS 448 px cache | 157 total | FBBench n=10 | see git log | loop_demo_traces.jsonl; frames in results/frames/, figures in results/figures/ |
 
 ## Dataset revisions
 
